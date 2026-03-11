@@ -1,252 +1,294 @@
 # Paper Hub
 
-本地运行的 AI 论文管理与阅读工作台。
+> Your local AI paper workbench.
 
-它把论文导入、元数据整理、应用内 PDF 阅读、页级翻译、论文 Digest、知识地图、主题发现下载整合在一个单机 Web 应用里，适合个人研究者在本地管理论文库。
+Paper Hub 是一个本地运行的论文阅读与整理工具。  
+它把 PDF 导入、AI 元数据整理、应用内阅读、中文翻译、论文 Digest、知识地图、主题发现下载放进同一个界面里，适合个人研究者、学生和独立开发者在自己的电脑上建立论文库。
 
-## 功能概览
+## Why Paper Hub
 
-- 本地 SQLite 持久化，数据默认保存在项目目录
-- 导入本地 PDF，自动提取标题、摘要、标签、封面
-- 应用内阅读 PDF，并记录阅读进度
-- AI 整理论文元数据：中文标题、摘要、标签、分类、合集
-- 页级中文阅读、嵌入翻译、全文翻译任务
-- 论文 Digest：Abstract / Method / Conclusion 精读摘要
-- 全库知识地图：思维导图 + 知识图谱
-- 主题发现：按输入主题检索开放 PDF、AI 评价 CRAAP、推荐阅读顺序并自动导入
-- 可切换多种 AI Provider，包括 OpenAI 兼容端点、本地 Ollama、LM Studio 等
+如果你平时会遇到这些问题：
 
-## 技术栈
+- 论文散落在下载目录、浏览器收藏夹、网盘和笔记软件里
+- PDF 下载了很多，但很难形成稳定的阅读顺序
+- 想快速得到中文摘要、重点结论和方法脉络
+- 想围绕某个主题批量找论文，而不是一篇篇手动搜
 
-- 前端：原生 `HTML + CSS + JavaScript`
-- 后端：Python 标准库 `http.server`
-- 数据库：SQLite
-- PDF 处理：`PyMuPDF (fitz)`、`pypdf`
-- AI 调用：通过后端统一适配多种 Provider HTTP API
+这个项目就是为这些场景准备的。
 
-## 项目结构
+## What It Can Do
 
-```text
-paper-hub/
-├─ index.html                # 页面骨架
-├─ app.js                    # 前端状态、渲染、交互、API 调用
-├─ styles.css                # 样式
-├─ server.py                 # 后端 API、数据库、PDF、AI、任务调度
-├─ start.bat                 # Windows 一键启动
-├─ .env.example              # 环境变量示例
-├─ provider_config.json      # Provider 配置文件（公开仓库中应保持无密钥）
-├─ paper_hub.db              # 运行后生成的本地数据库
-└─ storage/                  # PDF、封面、渲染图、翻译缓存、digest、地图缓存
+- 导入本地 PDF，自动提取标题、摘要、标签和封面
+- 用 AI 整理论文元数据：中文标题、中文摘要、标签、分类、合集
+- 在应用内直接阅读 PDF，并保存阅读进度
+- 支持中文精读、嵌入翻译、全文翻译任务
+- 生成论文 Digest：`Abstract / Method / Conclusion`
+- 生成全库知识地图：思维导图 + 知识图谱
+- 输入研究主题，自动检索开放 PDF，AI 评估 CRAAP，并推荐阅读顺序
+- 数据全部保存在本地，默认使用 SQLite + 本地文件存储
+
+## Architecture
+
+### Overall Architecture
+
+```mermaid
+flowchart LR
+    U[User] --> B[Browser UI]
+
+    subgraph Frontend
+        B --> H[index.html]
+        B --> J[app.js]
+        B --> C[styles.css]
+    end
+
+    J --> API[Python Local Server<br/>server.py]
+
+    subgraph Local Runtime
+        API --> DB[(SQLite<br/>paper_hub.db)]
+        API --> PDFS[storage/pdfs]
+        API --> COVERS[storage/covers]
+        API --> RENDERS[storage/renders]
+        API --> TRANS[storage/translations]
+        API --> DIGEST[storage/digests]
+        API --> MAPS[storage/maps]
+    end
+
+    API --> PDF[PDF Parsing<br/>PyMuPDF / pypdf]
+    API --> AI[AI Providers<br/>OpenAI / Anthropic / Gemini / Ollama / LM Studio ...]
+    API --> ARXIV[Open PDF Search<br/>arXiv]
 ```
 
-## 环境要求
+### Topic Discovery Flow
 
-- Python 3.10+
-- 已安装依赖：
-  - `PyMuPDF`
-  - `pypdf`
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as Paper Hub UI
+    participant Server as server.py
+    participant Search as arXiv
+    participant AI as AI Provider
+    participant Storage as Local Storage
 
-如果你使用全新环境，推荐先手动安装：
+    User->>UI: 输入研究主题
+    UI->>Server: POST /api/topic-discovery
+    Server->>Search: 检索开放 PDF 候选论文
+    Search-->>Server: 返回论文元数据
+    Server->>AI: 评估主题相关性 + CRAAP + 推荐阅读阶段
+    AI-->>Server: 返回评分与阅读理由
+    Server->>Storage: 下载前 N 篇 PDF 并入库
+    Server-->>UI: 返回候选论文 + 评分 + 导入状态 + 阅读顺序
+    UI-->>User: 展示推荐结果
+```
+
+## Quick Start
+
+### 1. Install Dependencies
+
+需要 Python 3.10+。
 
 ```powershell
 pip install pymupdf pypdf
 ```
 
-## 配置教程
+### 2. Configure AI
 
-### 1. 准备环境变量
-
-复制示例文件：
+复制环境变量模板：
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-然后按需填写：
+然后填写你自己的配置，例如：
 
 ```env
 AI_PROVIDER=openai
-AI_API_KEY=你的_API_Key
+AI_API_KEY=your_api_key
 AI_MODEL=gpt-5-mini
 AI_API_URL=
 ```
 
-说明：
+也可以不写 `.env`，启动后在页面右上角的 `AI Provider` 面板里配置。
 
-- `AI_PROVIDER`：当前默认 Provider 标识
-- `AI_API_KEY`：对应 Provider 的密钥
-- `AI_MODEL`：模型名
-- `AI_API_URL`：可选，自定义兼容端点时填写
-
-如果你不想直接写 `.env`，也可以启动应用后，在页面右上角的 `AI Provider` 对话框里配置。
-
-### 2. Provider 配置方式
-
-项目支持两种配置来源：
-
-1. `.env`
-2. 应用内 `AI Provider` 面板
-
-应用内保存的配置会写入 `provider_config.json`。公开仓库里不要提交真实 API key。
-
-### 3. 公开仓库前的安全建议
-
-发布到 GitHub 前，至少确认这些文件不含真实数据：
-
-- `.env`
-- `provider_config.json`
-- `paper_hub.db`
-- `storage/` 下的 PDF、渲染图、翻译缓存、digest、知识地图缓存
-
-推荐做法：
-
-- 只提交 `.env.example`
-- `provider_config.json` 保持空 key
-- 不提交本地数据库和论文文件
-- 用 `.gitignore` 忽略运行时文件
-
-## 使用教程
-
-### 启动
-
-方式 1：
+### 3. Run
 
 ```powershell
 python server.py
 ```
 
-方式 2（Windows）：
+或者在 Windows 上直接双击：
 
 ```text
 start.bat
 ```
 
-浏览器打开：
+打开浏览器访问：
 
 ```text
 http://127.0.0.1:8876
 ```
 
-### 基础使用
+## User Guide
 
-#### 1. 新增论文
+### Import a PDF
 
-- 点击 `新增论文`
-- 手动填写标题、作者、年份、标签、摘要等信息
-- 保存后进入论文库
+1. 点击 `导入 PDF`
+2. 选择你的本地论文文件
+3. 等待系统自动提取标题、摘要、标签和封面
 
-#### 2. 导入本地 PDF
+### Organize With AI
 
-- 点击 `导入 PDF`
-- 选择本地文件
-- 系统会自动提取标题、摘要、标签，并生成封面
+1. 在论文库中选中一篇论文
+2. 点击 `AI 整理`
+3. 系统会补全：
+   - 中文标题
+   - 中文摘要
+   - 标签
+   - 分类
+   - 合集
+   - 阅读优先级
 
-#### 3. AI 整理
+### Read Inside the App
 
-- 在右侧论文详情面板选中某篇论文
-- 点击 `AI 整理`
-- 系统会补全中文标题、中文摘要、关键词、分类、合集、优先级等
+选中带本地 PDF 的论文后，点击 `在应用内阅读`。
 
-#### 4. 阅读 PDF
+你可以切换三种模式：
 
-- 选中带本地 PDF 的论文
-- 点击 `在应用内阅读`
-- 可切换：
-  - 原文
-  - 中文精读
-  - 嵌入翻译
+- `原文`
+- `中文精读`
+- `嵌入翻译`
 
-#### 5. 查看论文 Digest
+系统会自动记录阅读进度和上次阅读位置。
 
-- 在详情面板点击 `查看`
-- 或在阅读器里点击 `论文精华`
-- 系统会整理 `Abstract / Method / Conclusion`
+### Generate a Paper Digest
 
-#### 6. 查看知识地图
+点击 `论文精华`，系统会生成：
 
-- 点击 `知识地图`
-- 支持：
-  - 全库视角
-  - 当前论文视角
-  - 思维导图
-  - 知识图谱
+- Abstract 精读
+- Method 精读
+- Conclusion 精读
+- 中文要点列表
 
-#### 7. 主题发现
+### Explore the Knowledge Map
 
-- 点击 `主题发现`
-- 输入主题，例如：
-  - `RAG evaluation`
-  - `multimodal retrieval`
-  - `多模态检索增强生成`
-- 设置：
-  - 检索篇数
-  - 自动下载前 N 篇
-- 系统会：
-  - 检索开放 PDF
-  - 用 AI 做 CRAAP 评价
-  - 给出推荐阅读顺序
-  - 自动下载推荐 PDF 并导入本地论文库
+点击 `知识地图`，你可以从两个角度查看论文库：
+
+- 全库视角
+- 当前论文视角
+
+并且可以在两种图之间切换：
+
+- 思维导图
+- 知识图谱
+
+### Discover Papers by Topic
+
+点击 `主题发现`，输入研究主题，例如：
+
+- `RAG evaluation`
+- `multimodal retrieval`
+- `multi-agent planning`
+- `多模态检索增强生成`
+
+系统会自动：
+
+1. 检索开放可下载的 PDF
+2. 用 AI 评估与主题的语义相关性
+3. 按 CRAAP 给出优先级
+4. 推荐阅读顺序
+5. 自动下载前 N 篇并导入本地论文库
 
 说明：
 
-- 主题发现默认使用开放可下载 PDF 的 arXiv 结果
-- 如果配置了 AI，会优先做语义相关性评价，不要求标题逐字匹配
-- 如果 AI 不可用，会回退到本地启发式评分
+- 这里的“相关性”是按主题语义判断，不要求论文标题逐字匹配输入主题
+- 如果 AI 不可用，会自动回退到本地启发式评分
+- 当前主题发现默认使用 arXiv 作为开放 PDF 来源
 
-## 数据位置
+## Data Storage
 
-- 数据库：`paper_hub.db`
-- PDF：`storage/pdfs/`
-- 封面：`storage/covers/`
-- 阅读器渲染图：`storage/renders/`
-- 翻译缓存：`storage/translations/`
-- Digest 缓存：`storage/digests/`
-- 知识地图缓存：`storage/maps/`
+Paper Hub 默认把数据保存在项目目录里：
 
-## 常见问题
+- `paper_hub.db`：论文元数据数据库
+- `storage/pdfs/`：本地 PDF
+- `storage/covers/`：封面
+- `storage/renders/`：阅读器页面渲染图
+- `storage/translations/`：翻译缓存
+- `storage/digests/`：Digest 缓存
+- `storage/maps/`：知识地图缓存
 
-### 1. 为什么打开 `index.html` 没反应？
+这意味着：
 
-这是一个本地 HTTP 应用，不支持直接双击 HTML 文件。请先运行：
+- 数据不会默认上传到云端
+- 迁移项目目录即可迁移大部分数据
+- 公开仓库时不要提交这些运行时文件
+
+## Supported AI Providers
+
+项目内置多种 Provider 适配，包括：
+
+- OpenAI
+- Anthropic
+- Gemini
+- OpenRouter
+- Groq
+- GLM
+- Qwen / DashScope
+- DeepSeek
+- Azure OpenAI
+- Ollama
+- LM Studio
+- OpenAI-compatible relay
+
+## Troubleshooting
+
+### The page does not work when I double-click `index.html`
+
+不要直接打开 HTML 文件。  
+先运行本地服务：
 
 ```powershell
 python server.py
 ```
 
-### 2. 为什么 AI 功能不可用？
+### AI features are unavailable
 
-常见原因：
+通常是下面几个原因：
 
-- 没配置 API key
-- Provider 端点不对
-- 模型名不对
-- 网络不可达
+- 没有配置 API key
+- Provider 端点不正确
+- 模型名不正确
+- 当前网络无法访问模型服务
 
-先检查 `.env` 或应用内 `AI Provider` 面板。
+优先检查：
 
-### 3. 为什么中文主题发现效果一般？
+- `.env`
+- 页面中的 `AI Provider` 设置面板
 
-如果没有配置 AI，系统无法先把中文主题改写成更适合学术检索的英文查询，召回效果会变差。建议：
+### Topic discovery is weak for Chinese queries
+
+如果没有启用 AI，系统无法先把中文主题改写成更适合学术检索的英文查询，召回效果会下降。  
+更稳定的做法：
 
 - 配置 AI Provider
-- 或者直接输入英文研究主题
+- 或者直接使用英文研究主题
 
-## 发布到 GitHub 的建议流程
+## Public Release Checklist
 
-```powershell
-git status
-git add .
-git commit -m "Prepare public release"
-git push origin main
-```
+如果你要把这个项目公开发布到 GitHub，请先确认：
 
-在这之前，请确认：
+- `.env` 不包含真实密钥
+- `provider_config.json` 不包含真实密钥
+- 没有提交本地数据库
+- 没有提交个人 PDF、渲染图、翻译缓存和 Digest 缓存
+- `.gitignore` 已忽略运行时文件
 
-- 没有真实 API key
-- 没有个人论文 PDF
-- 没有本地数据库内容
-- 没有翻译缓存、渲染图、digest 缓存
+## Roadmap Ideas
+
+- OpenAlex / Semantic Scholar / Crossref 多源检索
+- 手动勾选主题发现结果后再导入
+- BibTeX / RIS 导入导出
+- 更细粒度的全文搜索
+- 多设备同步或备份
 
 ## License
 
-如果准备公开发布，建议补充 `LICENSE` 文件后再推送。
+如果准备正式公开发布，建议补充 `LICENSE` 文件。
