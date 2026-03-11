@@ -89,6 +89,8 @@
         <div class="hero-actions">
           <button class="primary-button" id="newPaperButton" type="button">新增论文</button>
           <button class="secondary-button" id="importButton" type="button">导入 PDF</button>
+          <button class="secondary-button" id="topicDiscoveryButton" type="button">主题发现</button>
+          <button class="secondary-button" id="mapButton" type="button">知识地图</button>
           <button class="secondary-button" id="providerSettingsButton" type="button">AI Provider</button>
           <button class="secondary-button" id="exportButton" type="button">导出 JSON</button>
         </div>
@@ -404,6 +406,116 @@
         <button class="primary-button" type="submit">保存 Provider</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog class="paper-dialog discovery-dialog" id="topicDiscoveryDialog">
+    <form class="dialog-card discovery-card" id="topicDiscoveryForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">Topic Discovery</p>
+          <h3>自动找论文、下载 PDF 和推荐阅读顺序</h3>
+        </div>
+        <button class="icon-button" id="closeTopicDiscoveryButton" type="button">×</button>
+      </div>
+
+      <div class="discovery-grid">
+        <label class="full-width">
+          研究主题
+          <input class="input" id="topicDiscoveryInput" name="topic" placeholder="例如：RAG evaluation / 多模态检索增强生成" required>
+        </label>
+
+        <label>
+          检索篇数
+          <input class="input" id="topicDiscoveryLimit" name="limit" type="number" min="3" max="20" value="10">
+        </label>
+
+        <label>
+          自动下载前 N 篇
+          <input class="input" id="topicDiscoveryAutoDownloadCount" name="autoDownloadCount" type="number" min="0" max="10" value="5">
+        </label>
+
+        <section class="provider-summary full-width">
+          <p class="provider-title">检索范围</p>
+          <p class="provider-copy">当前版本默认使用可开放下载 PDF 的 arXiv 结果。优先由 AI 按主题相关性做 CRAAP 评分，不要求标题逐字匹配；AI 不可用时回退本地规则。</p>
+          <div class="detail-meta">
+            <span class="meta-chip">自动下载 PDF</span>
+            <span class="meta-chip">AI CRAAP 评分</span>
+            <span class="meta-chip">推荐阅读顺序</span>
+          </div>
+        </section>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="secondary-button" id="cancelTopicDiscoveryButton" type="button">取消</button>
+        <button class="primary-button" id="runTopicDiscoveryButton" type="submit">开始检索</button>
+      </div>
+
+      <p class="library-meta" id="topicDiscoveryMeta">输入主题后，系统会检索开放 PDF 论文并自动导入推荐结果。</p>
+      <div class="digest-takeaways map-insights" id="topicDiscoveryStrategy"></div>
+      <div class="topic-discovery-results" id="topicDiscoveryResults">
+        <div class="map-empty">
+          <div>
+            <h3>暂无检索结果</h3>
+            <p>输入一个主题后，这里会展示 CRAAP 评分、下载状态和推荐阅读顺序。</p>
+          </div>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="paper-dialog map-dialog" id="mapDialog">
+    <div class="dialog-card map-card">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">Knowledge Map</p>
+          <h3>论文思维导图与知识图谱</h3>
+        </div>
+        <div class="toolbar-actions">
+          <button class="secondary-button" id="refreshMapButton" type="button">重新生成</button>
+          <button class="icon-button" id="closeMapButton" type="button">×</button>
+        </div>
+      </div>
+
+      <div class="map-summary-panel">
+        <div class="map-meta-row">
+          <p class="library-meta" id="mapMeta"></p>
+          <div class="toolbar-actions">
+            <div class="view-toggle map-scope-toggle">
+              <button class="toggle-chip active" id="mapLibraryScopeButton" type="button">全库</button>
+              <button class="toggle-chip" id="mapPaperScopeButton" type="button">当前论文</button>
+            </div>
+            <div class="view-toggle map-mode-toggle">
+              <button class="toggle-chip active" id="mapMindButton" type="button">思维导图</button>
+              <button class="toggle-chip" id="mapGraphButton" type="button">知识图谱</button>
+            </div>
+          </div>
+        </div>
+        <p class="map-summary-copy" id="mapSummary"></p>
+        <div class="digest-takeaways map-insights" id="mapInsights"></div>
+        <div class="map-control-row">
+          <div class="view-toggle map-zoom-toggle">
+            <button class="toggle-chip" id="mapZoomOutButton" type="button">缩小</button>
+            <button class="toggle-chip" id="mapZoomResetButton" type="button">重置视图</button>
+            <button class="toggle-chip" id="mapZoomInButton" type="button">放大</button>
+          </div>
+          <div class="view-toggle map-expand-toggle">
+            <button class="toggle-chip" id="mapCollapseAllButton" type="button">收起主题</button>
+            <button class="toggle-chip" id="mapExpandAllButton" type="button">展开主题</button>
+          </div>
+        </div>
+        <section class="map-selection-panel" id="mapSelectionPanel">
+          <div>
+            <p class="eyebrow">Focused Node</p>
+            <h4 id="mapSelectionTitle">Paper Hub 论文知识地图</h4>
+            <p class="library-meta" id="mapSelectionMeta"></p>
+          </div>
+          <p class="map-selection-copy" id="mapSelectionCopy">在图中悬停或点击节点，可以查看主题、概念和论文之间的关系。</p>
+          <button class="secondary-button hidden" id="mapSelectionAction" type="button">定位论文</button>
+        </section>
+      </div>
+
+      <div class="map-canvas" id="mapCanvas"></div>
+    </div>
   </dialog>
 
   <input id="importInput" type="file" accept="application/pdf" hidden>

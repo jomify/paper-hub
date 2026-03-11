@@ -16,6 +16,19 @@
   editingPaperId: null,
   draftCoverImage: "",
   digests: {},
+  topicDiscovery: {
+    payload: null
+  },
+  libraryMap: {
+    payload: null,
+    view: "mind",
+    scope: "library",
+    expandedThemes: new Set(),
+    activeNodeId: "",
+    hoveredNodeId: "",
+    nodeIndex: new Map(),
+    viewport: createLibraryMapViewport("mind")
+  },
   reader: {
     paperId: null,
     pages: [],
@@ -66,6 +79,8 @@ const elements = {
   sortFilter: document.querySelector("#sortFilter"),
   newPaperButton: document.querySelector("#newPaperButton"),
   importButton: document.querySelector("#importButton"),
+  topicDiscoveryButton: document.querySelector("#topicDiscoveryButton"),
+  mapButton: document.querySelector("#mapButton"),
   providerSettingsButton: document.querySelector("#providerSettingsButton"),
   importInput: document.querySelector("#importInput"),
   exportButton: document.querySelector("#exportButton"),
@@ -143,6 +158,36 @@ const elements = {
   providerClearApiKey: document.querySelector("#providerClearApiKey"),
   closeProviderButton: document.querySelector("#closeProviderButton"),
   cancelProviderButton: document.querySelector("#cancelProviderButton"),
+  topicDiscoveryDialog: document.querySelector("#topicDiscoveryDialog"),
+  topicDiscoveryForm: document.querySelector("#topicDiscoveryForm"),
+  topicDiscoveryInput: document.querySelector("#topicDiscoveryInput"),
+  topicDiscoveryLimit: document.querySelector("#topicDiscoveryLimit"),
+  topicDiscoveryAutoDownloadCount: document.querySelector("#topicDiscoveryAutoDownloadCount"),
+  topicDiscoveryMeta: document.querySelector("#topicDiscoveryMeta"),
+  topicDiscoveryStrategy: document.querySelector("#topicDiscoveryStrategy"),
+  topicDiscoveryResults: document.querySelector("#topicDiscoveryResults"),
+  closeTopicDiscoveryButton: document.querySelector("#closeTopicDiscoveryButton"),
+  cancelTopicDiscoveryButton: document.querySelector("#cancelTopicDiscoveryButton"),
+  mapDialog: document.querySelector("#mapDialog"),
+  mapMeta: document.querySelector("#mapMeta"),
+  mapSummary: document.querySelector("#mapSummary"),
+  mapInsights: document.querySelector("#mapInsights"),
+  mapZoomOutButton: document.querySelector("#mapZoomOutButton"),
+  mapZoomResetButton: document.querySelector("#mapZoomResetButton"),
+  mapZoomInButton: document.querySelector("#mapZoomInButton"),
+  mapCollapseAllButton: document.querySelector("#mapCollapseAllButton"),
+  mapExpandAllButton: document.querySelector("#mapExpandAllButton"),
+  mapSelectionTitle: document.querySelector("#mapSelectionTitle"),
+  mapSelectionMeta: document.querySelector("#mapSelectionMeta"),
+  mapSelectionCopy: document.querySelector("#mapSelectionCopy"),
+  mapSelectionAction: document.querySelector("#mapSelectionAction"),
+  mapCanvas: document.querySelector("#mapCanvas"),
+  mapLibraryScopeButton: document.querySelector("#mapLibraryScopeButton"),
+  mapPaperScopeButton: document.querySelector("#mapPaperScopeButton"),
+  mapMindButton: document.querySelector("#mapMindButton"),
+  mapGraphButton: document.querySelector("#mapGraphButton"),
+  refreshMapButton: document.querySelector("#refreshMapButton"),
+  closeMapButton: document.querySelector("#closeMapButton"),
   paperCardTemplate: document.querySelector("#paperCardTemplate")
 };
 
@@ -186,6 +231,8 @@ function bindEvents() {
 
   elements.newPaperButton.addEventListener("click", () => openDialog());
   elements.importButton.addEventListener("click", () => elements.importInput.click());
+  elements.topicDiscoveryButton.addEventListener("click", () => openTopicDiscoveryDialog());
+  elements.mapButton.addEventListener("click", () => openKnowledgeMapDialog(false));
   elements.providerSettingsButton.addEventListener("click", () => openProviderDialog());
   elements.importInput.addEventListener("change", handlePdfImport);
   elements.exportButton.addEventListener("click", exportLibrary);
@@ -277,6 +324,31 @@ function bindEvents() {
     event.preventDefault();
     await saveProviderConfig();
   });
+  elements.closeTopicDiscoveryButton.addEventListener("click", closeTopicDiscoveryDialog);
+  elements.cancelTopicDiscoveryButton.addEventListener("click", closeTopicDiscoveryDialog);
+  elements.topicDiscoveryForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await runTopicDiscovery();
+  });
+  elements.mapLibraryScopeButton.addEventListener("click", () => setLibraryMapScope("library"));
+  elements.mapPaperScopeButton.addEventListener("click", () => setLibraryMapScope("paper"));
+  elements.mapMindButton.addEventListener("click", () => setLibraryMapView("mind"));
+  elements.mapGraphButton.addEventListener("click", () => setLibraryMapView("graph"));
+  elements.mapZoomOutButton.addEventListener("click", () => zoomKnowledgeMap(-0.12));
+  elements.mapZoomResetButton.addEventListener("click", () => resetKnowledgeMapViewport(true));
+  elements.mapZoomInButton.addEventListener("click", () => zoomKnowledgeMap(0.12));
+  elements.mapCollapseAllButton.addEventListener("click", () => setAllMindMapThemesExpanded(false));
+  elements.mapExpandAllButton.addEventListener("click", () => setAllMindMapThemesExpanded(true));
+  elements.mapSelectionAction.addEventListener("click", openActiveKnowledgeMapPaper);
+  elements.refreshMapButton.addEventListener("click", () => openKnowledgeMapDialog(true));
+  elements.closeMapButton.addEventListener("click", closeKnowledgeMapDialog);
+  elements.mapCanvas.addEventListener("click", handleKnowledgeMapClick);
+  elements.mapCanvas.addEventListener("wheel", handleKnowledgeMapWheel, { passive: false });
+  elements.mapCanvas.addEventListener("pointerdown", handleKnowledgeMapPointerDown);
+  elements.mapCanvas.addEventListener("pointermove", handleKnowledgeMapPointerMove);
+  elements.mapCanvas.addEventListener("pointerup", handleKnowledgeMapPointerUp);
+  elements.mapCanvas.addEventListener("pointercancel", handleKnowledgeMapPointerUp);
+  elements.mapCanvas.addEventListener("pointerleave", handleKnowledgeMapPointerLeave);
 
   elements.paperCover.addEventListener("change", async (event) => {
     const [file] = event.target.files;
@@ -984,6 +1056,877 @@ function closeProviderDialog() {
   elements.providerDialog.close();
 }
 
+function openTopicDiscoveryDialog() {
+  renderTopicDiscoveryResults();
+  elements.topicDiscoveryDialog.showModal();
+}
+
+function closeTopicDiscoveryDialog() {
+  elements.topicDiscoveryDialog.close();
+}
+
+async function runTopicDiscovery() {
+  const topic = normalizeString(elements.topicDiscoveryInput.value);
+  const limit = Math.min(20, Math.max(3, normalizeNumber(elements.topicDiscoveryLimit.value) || 10));
+  const autoDownloadCount = Math.min(10, Math.max(0, Number(elements.topicDiscoveryAutoDownloadCount.value) || 0));
+  if (!topic) {
+    setNotice("请先输入研究主题。");
+    return;
+  }
+
+  elements.topicDiscoveryMeta.textContent = `正在检索“${topic}”相关论文并自动下载推荐 PDF...`;
+  elements.topicDiscoveryStrategy.innerHTML = "";
+  elements.topicDiscoveryResults.innerHTML = '<div class="map-empty"><div><h3>正在检索</h3><p>系统会抓取开放 PDF、做 CRAAP 评分，并给出推荐阅读顺序。</p></div></div>';
+
+  try {
+    const payload = await api("/api/topic-discovery", {
+      method: "POST",
+      body: JSON.stringify({ topic, limit, autoDownloadCount })
+    });
+    state.topicDiscovery.payload = payload;
+    renderTopicDiscoveryResults();
+    if ((payload.importedCount || 0) + (payload.updatedCount || 0) > 0) {
+      await refreshPapers();
+      const imported = (payload.results || []).find((item) => item.paperId);
+      if (imported?.paperId) state.selectedPaperId = imported.paperId;
+      render();
+    }
+    setNotice(
+      `主题发现完成：新增 ${payload.importedCount || 0} 篇，更新 ${payload.updatedCount || 0} 篇，跳过 ${payload.existingCount || 0} 篇。`
+    );
+  } catch (error) {
+    elements.topicDiscoveryMeta.textContent = `检索失败：${error.message}`;
+    elements.topicDiscoveryResults.innerHTML = '<div class="map-empty"><div><h3>检索失败</h3><p>请检查网络连通性，或缩小主题范围后重试。</p></div></div>';
+    showError(error);
+  }
+}
+
+function renderTopicDiscoveryResults() {
+  const payload = state.topicDiscovery.payload;
+  if (!payload) {
+    elements.topicDiscoveryMeta.textContent = "输入主题后，系统会检索开放 PDF 论文并自动导入推荐结果。";
+    elements.topicDiscoveryStrategy.innerHTML = "";
+    elements.topicDiscoveryResults.innerHTML = '<div class="map-empty"><div><h3>暂无检索结果</h3><p>输入一个主题后，这里会展示 CRAAP 评分、下载状态和推荐阅读顺序。</p></div></div>';
+    return;
+  }
+
+  elements.topicDiscoveryMeta.textContent = [
+    `来源: ${payload.source || "arXiv"}`,
+    payload.searchQuery ? `检索词: ${payload.searchQuery}` : "",
+    payload.evaluationSource === "ai"
+      ? `评估: AI${payload.evaluationModel ? ` (${payload.evaluationModel})` : ""}`
+      : "评估: 本地规则回退",
+    `候选: ${(payload.results || []).length}`,
+    `自动下载: ${payload.autoDownloadCount || 0}`,
+    payload.warning || ""
+  ].filter(Boolean).join(" · ");
+
+  elements.topicDiscoveryStrategy.innerHTML = "";
+  (payload.readingStrategy || []).forEach((item) => {
+    const chip = document.createElement("div");
+    chip.className = "digest-bullet";
+    chip.textContent = item;
+    elements.topicDiscoveryStrategy.append(chip);
+  });
+
+  const results = payload.results || [];
+  if (!results.length) {
+    elements.topicDiscoveryResults.innerHTML = '<div class="map-empty"><div><h3>没有找到结果</h3><p>可以改用更具体的英文关键词，或者先配置 AI Provider 用于中文主题改写。</p></div></div>';
+    return;
+  }
+
+  elements.topicDiscoveryResults.innerHTML = results.map((item) => {
+    const craap = item.craap || {};
+    const statusClass = normalizeString(item.importStatus || "pending");
+    const authors = (item.authors || []).slice(0, 4).join(", ");
+    return `
+      <article class="topic-result-card">
+        <div class="topic-result-head">
+          <div class="topic-rank-badge">推荐 ${escapeHtml(item.recommendedOrder)}</div>
+          <div class="detail-meta">
+            <span class="meta-chip">CRAAP ${escapeHtml(craap.total || 0)}/100</span>
+            <span class="meta-chip">${escapeHtml(item.readingStage || "frontier")}</span>
+            <span class="meta-chip">${escapeHtml(item.year || "未知年份")}</span>
+          </div>
+        </div>
+        <h4>${escapeHtml(item.title || "Untitled")}</h4>
+        <p class="topic-result-meta">${escapeHtml(authors || "未知作者")} · ${escapeHtml(item.sourceLabel || "arXiv")}</p>
+        <p class="topic-result-summary">${escapeHtml(item.summary || "暂无摘要。")}</p>
+        <div class="detail-meta">
+          <span class="meta-chip">C ${escapeHtml(craap.currency || 0)}</span>
+          <span class="meta-chip">R ${escapeHtml(craap.relevance || 0)}</span>
+          <span class="meta-chip">A ${escapeHtml(craap.authority || 0)}</span>
+          <span class="meta-chip">A ${escapeHtml(craap.accuracy || 0)}</span>
+          <span class="meta-chip">P ${escapeHtml(craap.purpose || 0)}</span>
+        </div>
+        <p class="topic-result-reason">${escapeHtml(item.recommendationReason || "")}</p>
+        <div class="topic-result-footer">
+          <span class="topic-import-status ${escapeHtml(statusClass)}">${escapeHtml(item.importStatus || "pending")}</span>
+          <span class="topic-result-message">${escapeHtml(item.importMessage || "")}</span>
+        </div>
+        <div class="hero-actions">
+          ${item.url ? `<a class="secondary-button" href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">摘要页</a>` : ""}
+          ${item.pdfUrl ? `<a class="secondary-button" href="${escapeHtml(item.pdfUrl)}" target="_blank" rel="noreferrer">PDF</a>` : ""}
+          ${item.paperId ? `<button class="secondary-button" type="button" data-open-paper-id="${escapeHtml(item.paperId)}">定位到论文</button>` : ""}
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  elements.topicDiscoveryResults.querySelectorAll("[data-open-paper-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const paperId = button.getAttribute("data-open-paper-id");
+      if (!paperId) return;
+      state.selectedPaperId = paperId;
+      closeTopicDiscoveryDialog();
+      render();
+    });
+  });
+}
+
+async function openKnowledgeMapDialog(refresh = false) {
+  elements.mapMeta.textContent = refresh ? "正在重新生成知识地图..." : "正在加载知识地图...";
+  elements.mapSummary.textContent = "系统会基于当前论文库整理主题脉络、关键概念和主题关系。";
+  elements.mapInsights.innerHTML = "";
+  elements.mapSelectionTitle.textContent = "Paper Hub 论文知识地图";
+  elements.mapSelectionMeta.textContent = "";
+  elements.mapSelectionCopy.textContent = "在图中悬停或点击节点，可以查看主题、概念和论文之间的关系。";
+  elements.mapSelectionAction.classList.add("hidden");
+  elements.mapCanvas.innerHTML = '<div class="map-empty"><div><h3>正在构建知识地图</h3><p>这一步会汇总当前论文库并尝试生成全库主题结构。</p></div></div>';
+  elements.mapDialog.showModal();
+  try {
+    const paperId = currentLibraryMapPaperId();
+    const payload = refresh
+      ? await api("/api/library-map", { method: "POST", body: JSON.stringify({ paperId }) })
+      : await api(`/api/library-map${paperId ? `?paperId=${encodeURIComponent(paperId)}` : ""}`);
+    setKnowledgeMapPayload(payload, true);
+    renderKnowledgeMap();
+  } catch (error) {
+    elements.mapMeta.textContent = `加载失败：${error.message}`;
+    elements.mapCanvas.innerHTML = '<div class="map-empty"><div><h3>知识地图生成失败</h3><p>请检查本地服务或 AI Provider 配置。</p></div></div>';
+    showError(error);
+  }
+}
+
+function closeKnowledgeMapDialog() {
+  releaseKnowledgeMapPointer();
+  elements.mapDialog.close();
+}
+
+function currentLibraryMapPaperId() {
+  return state.libraryMap.scope === "paper" ? (state.selectedPaperId || "") : "";
+}
+
+function setLibraryMapScope(scope) {
+  state.libraryMap.scope = scope;
+  if (elements.mapDialog.open) {
+    openKnowledgeMapDialog(false);
+  } else {
+    renderKnowledgeMap();
+  }
+}
+
+function setLibraryMapView(view) {
+  if (state.libraryMap.view === view) return;
+  state.libraryMap.view = view;
+  state.libraryMap.viewport = createLibraryMapViewport(view);
+  renderKnowledgeMap();
+}
+
+function handleKnowledgeMapClick(event) {
+  const node = event.target.closest("[data-node-id]");
+  if (!node) return;
+  const nodeId = node.getAttribute("data-node-id");
+  if (!nodeId) return;
+  const role = node.getAttribute("data-node-role") || "";
+  state.libraryMap.activeNodeId = nodeId;
+  state.libraryMap.hoveredNodeId = "";
+  if (role === "theme" && state.libraryMap.view === "mind") {
+    toggleMindMapTheme(nodeId);
+    return;
+  }
+  if ((event.metaKey || event.ctrlKey) && node.getAttribute("data-paper-id")) {
+    openPaperFromKnowledgeMap(node.getAttribute("data-paper-id"));
+    return;
+  }
+  renderKnowledgeMap();
+}
+
+function handleKnowledgeMapWheel(event) {
+  const stage = event.target.closest("[data-map-stage]");
+  if (!stage) return;
+  event.preventDefault();
+  const delta = event.deltaY > 0 ? -0.08 : 0.08;
+  zoomKnowledgeMap(delta, event.clientX, event.clientY);
+}
+
+function handleKnowledgeMapPointerDown(event) {
+  const stage = event.target.closest("[data-map-stage]");
+  if (!stage || event.target.closest("[data-node-id]")) return;
+  state.libraryMap.viewport.panning = true;
+  state.libraryMap.viewport.pointerId = event.pointerId;
+  state.libraryMap.viewport.startX = event.clientX;
+  state.libraryMap.viewport.startY = event.clientY;
+  state.libraryMap.viewport.originX = state.libraryMap.viewport.x;
+  state.libraryMap.viewport.originY = state.libraryMap.viewport.y;
+  stage.setPointerCapture?.(event.pointerId);
+  syncKnowledgeMapViewport();
+}
+
+function handleKnowledgeMapPointerMove(event) {
+  const hoveredNode = event.target.closest("[data-node-id]");
+  const hoveredNodeId = hoveredNode?.getAttribute("data-node-id") || "";
+  if (hoveredNodeId !== state.libraryMap.hoveredNodeId) {
+    state.libraryMap.hoveredNodeId = hoveredNodeId;
+    syncKnowledgeMapSelection();
+  }
+  if (!state.libraryMap.viewport.panning || state.libraryMap.viewport.pointerId !== event.pointerId) return;
+  state.libraryMap.viewport.x = state.libraryMap.viewport.originX + (event.clientX - state.libraryMap.viewport.startX);
+  state.libraryMap.viewport.y = state.libraryMap.viewport.originY + (event.clientY - state.libraryMap.viewport.startY);
+  syncKnowledgeMapViewport();
+}
+
+function handleKnowledgeMapPointerUp(event) {
+  if (state.libraryMap.viewport.pointerId !== event.pointerId) return;
+  releaseKnowledgeMapPointer();
+}
+
+function handleKnowledgeMapPointerLeave() {
+  state.libraryMap.hoveredNodeId = "";
+  syncKnowledgeMapSelection();
+  if (state.libraryMap.viewport.panning) {
+    releaseKnowledgeMapPointer();
+  }
+}
+
+function renderKnowledgeMap() {
+  const payload = state.libraryMap.payload;
+  const hasSelectedPaper = Boolean(state.selectedPaperId && getSelectedPaper());
+  if (state.libraryMap.scope === "paper" && !hasSelectedPaper) {
+    state.libraryMap.scope = "library";
+  }
+  elements.mapLibraryScopeButton.classList.toggle("active", state.libraryMap.scope === "library");
+  elements.mapPaperScopeButton.classList.toggle("active", state.libraryMap.scope === "paper");
+  elements.mapPaperScopeButton.disabled = !hasSelectedPaper;
+  elements.mapMindButton.classList.toggle("active", state.libraryMap.view === "mind");
+  elements.mapGraphButton.classList.toggle("active", state.libraryMap.view === "graph");
+  elements.mapZoomOutButton.disabled = !payload;
+  elements.mapZoomResetButton.disabled = !payload;
+  elements.mapZoomInButton.disabled = !payload;
+  elements.mapCollapseAllButton.disabled = state.libraryMap.view !== "mind" || !payload;
+  elements.mapExpandAllButton.disabled = state.libraryMap.view !== "mind" || !payload;
+  if (!payload) {
+    elements.mapMeta.textContent = "还没有知识地图数据。";
+    elements.mapSummary.textContent = "导入论文后即可生成。";
+    elements.mapInsights.innerHTML = "";
+    elements.mapCanvas.innerHTML = '<div class="map-empty"><div><h3>暂无数据</h3><p>请先导入论文，或点击“重新生成”。</p></div></div>';
+    syncKnowledgeMapSelection();
+    return;
+  }
+
+  if (!state.libraryMap.nodeIndex.size) {
+    rebuildKnowledgeMapNodeIndex(payload);
+  }
+  const stats = payload.stats || {};
+  elements.mapMeta.textContent = [
+    payload.scope?.mode === "paper" ? `作用域: ${payload.scope?.label || "当前论文"}` : "作用域: 整个论文库",
+    payload.source === "ai" ? "来源: AI 生成" : "来源: 本地规则",
+    payload.aiModel ? `模型: ${payload.aiModel}` : "",
+    stats.paperCount ? `论文: ${stats.paperCount}` : "论文: 0",
+    stats.themeCount ? `主题: ${stats.themeCount}` : "",
+    payload.updatedAt ? `更新时间: ${payload.updatedAt}` : ""
+  ].filter(Boolean).join(" · ");
+  elements.mapSummary.textContent = payload.summaryZh || "系统已根据当前论文库生成全库知识地图。";
+  elements.mapInsights.innerHTML = "";
+  (payload.insightsZh || []).forEach((item) => {
+    const chip = document.createElement("div");
+    chip.className = "digest-bullet";
+    chip.textContent = item;
+    elements.mapInsights.append(chip);
+  });
+  if (payload.message) {
+    const chip = document.createElement("div");
+    chip.className = "digest-bullet";
+    chip.textContent = payload.message;
+    elements.mapInsights.append(chip);
+  }
+
+  if (state.libraryMap.view === "graph") {
+    elements.mapCanvas.innerHTML = renderKnowledgeGraphView(payload.knowledgeGraph || {});
+  } else {
+    elements.mapCanvas.innerHTML = renderMindMapView(payload.mindMap || {});
+  }
+  syncKnowledgeMapViewport();
+  syncKnowledgeMapSelection();
+}
+
+function renderMindMapView(mindMap) {
+  const layout = layoutMindMap(mindMap);
+  if (!layout.nodes.length) {
+    return '<div class="map-empty"><div><h3>暂无主题</h3><p>当前论文库还不足以生成稳定的主题结构。</p></div></div>';
+  }
+  return `
+    <div class="map-stage" data-map-stage>
+      <div class="map-scene" data-map-scene style="width:${layout.width}px; height:${layout.height}px;">
+        <svg viewBox="0 0 ${layout.width} ${layout.height}" role="img" aria-label="Interactive mind map">
+          ${layout.edges.map(renderMindMapEdge).join("")}
+          ${layout.nodes.map(renderMindMapNode).join("")}
+        </svg>
+      </div>
+    </div>
+  `;
+}
+
+function renderMindMapEdge(edge) {
+  return `
+    <path class="mind-edge ${edge.type === "theme-link" ? "is-theme-link" : ""}" d="${edge.path}"></path>
+  `;
+}
+
+function renderMindMapNode(node) {
+  const lines = wrapMapLabel(node.label, node.role === "hub" ? 12 : 18, 2);
+  const meta = truncateGraphLabel(node.meta || "", node.role === "theme" ? 20 : 24);
+  const titleY = meta ? 24 : 30;
+  const isActive = currentKnowledgeMapNodeId() === node.id;
+  const classes = [
+    "mind-node",
+    `mind-node-${node.role}`,
+    node.paperId || node.role === "theme" ? "is-interactive" : "",
+    node.role === "theme" && !node.expanded ? "is-collapsed" : "",
+    isActive ? "is-active" : ""
+  ].filter(Boolean).join(" ");
+  return `
+    <g
+      class="${classes}"
+      transform="translate(${node.x.toFixed(1)} ${node.y.toFixed(1)})"
+      data-node-id="${escapeHtml(node.id)}"
+      data-node-role="${escapeHtml(node.role)}"
+      ${node.paperId ? `data-paper-id="${escapeHtml(node.paperId)}"` : ""}
+    >
+      <title>${escapeHtml([node.label, node.meta, node.description].filter(Boolean).join(" · "))}</title>
+      <rect width="${node.width}" height="${node.height}" rx="${node.role === "hub" ? 28 : 18}" ry="${node.role === "hub" ? 28 : 18}"></rect>
+      ${renderSvgTextLines(lines, 18, titleY, 18, "mind-node-title")}
+      ${meta ? `<text class="mind-node-meta" x="18" y="${node.height - 16}">${escapeXml(meta)}</text>` : ""}
+      ${node.role === "theme" ? renderMindMapToggle(node) : ""}
+    </g>
+  `;
+}
+
+function renderMindMapToggle(node) {
+  const centerX = node.width - 20;
+  const centerY = 18;
+  return `
+    <g aria-hidden="true">
+      <circle class="mind-node-toggle" cx="${centerX}" cy="${centerY}" r="10"></circle>
+      <line class="mind-node-toggle-mark" x1="${centerX - 4}" y1="${centerY}" x2="${centerX + 4}" y2="${centerY}"></line>
+      ${node.expanded ? "" : `<line class="mind-node-toggle-mark" x1="${centerX}" y1="${centerY - 4}" x2="${centerX}" y2="${centerY + 4}"></line>`}
+    </g>
+  `;
+}
+
+function renderKnowledgeGraphView(graph) {
+  const layout = layoutKnowledgeGraph(graph);
+  if (!layout.nodes.length) {
+    return '<div class="map-empty"><div><h3>暂无图谱</h3><p>请先导入论文，或重新生成知识地图。</p></div></div>';
+  }
+  return `
+    <div class="map-stage" data-map-stage>
+      <div class="map-scene graph-shell" data-map-scene style="width:${layout.width}px; height:${layout.height}px;">
+        <svg viewBox="0 0 ${layout.width} ${layout.height}" role="img" aria-label="Knowledge graph">
+          ${layout.edges.map((edge) => {
+            const midX = ((edge.source.x + edge.target.x) / 2).toFixed(1);
+            const midY = ((edge.source.y + edge.target.y) / 2).toFixed(1);
+            return `
+              <g>
+                <line class="graph-edge" x1="${edge.source.x.toFixed(1)}" y1="${edge.source.y.toFixed(1)}" x2="${edge.target.x.toFixed(1)}" y2="${edge.target.y.toFixed(1)}"></line>
+                ${edge.label ? `<text class="graph-edge-label" x="${midX}" y="${midY}">${escapeHtml(truncateGraphLabel(edge.label, 14))}</text>` : ""}
+              </g>
+            `;
+          }).join("")}
+          ${layout.nodes.map((node) => `
+            <g
+              class="graph-node graph-node-${escapeHtml(node.type || "paper")} ${node.paperId ? "graph-node-clickable" : ""} ${currentKnowledgeMapNodeId() === node.id ? "is-active" : ""}"
+              transform="translate(${node.x.toFixed(1)} ${node.y.toFixed(1)})"
+              data-node-id="${escapeHtml(node.id)}"
+              data-node-role="${escapeHtml(node.type || "paper")}"
+              ${node.paperId ? `data-paper-id="${escapeHtml(node.paperId)}"` : ""}
+            >
+              <title>${escapeHtml([node.label, node.meta].filter(Boolean).join(" · "))}</title>
+              <circle r="${Math.max(12, Number(node.size) || 14)}"></circle>
+              <text y="4">${escapeHtml(truncateGraphLabel(node.label || "Node", 14))}</text>
+              ${node.meta ? `<text class="graph-node-meta" y="${Math.max(18, (Number(node.size) || 14) + 14)}">${escapeHtml(truncateGraphLabel(node.meta, 18))}</text>` : ""}
+            </g>
+          `).join("")}
+        </svg>
+      </div>
+    </div>
+  `;
+}
+
+function layoutMindMap(mindMap) {
+  const branches = Array.isArray(mindMap.children) ? mindMap.children : [];
+  if (!branches.length) {
+    return { width: 0, height: 0, nodes: [], edges: [] };
+  }
+
+  const width = 1760;
+  const centerX = width / 2;
+  const centerNode = {
+    id: "hub",
+    role: "hub",
+    label: mindMap.label || "Paper Hub 论文知识地图",
+    meta: "主题总览",
+    description: "从当前论文库中抽取主题、关键概念和代表论文，形成动态阅读脉络。",
+    width: 290,
+    height: 92
+  };
+  const themeWidth = 250;
+  const themeHeight = 78;
+  const leafWidth = 230;
+  const conceptHeight = 52;
+  const paperHeight = 58;
+  const branchGap = 28;
+  const childGap = 14;
+
+  const groups = branches.map((branch, index) => {
+    const concepts = (Array.isArray(branch.children) ? branch.children : []).filter((child) => child.type === "concept");
+    const papers = (Array.isArray(branch.children) ? branch.children : []).filter((child) => child.type !== "concept");
+    const children = [...concepts, ...papers];
+    const expanded = state.libraryMap.expandedThemes.has(branch.id);
+    const childHeight = expanded
+      ? children.reduce((sum, child, childIndex) => sum + (child.type === "concept" ? conceptHeight : paperHeight) + (childIndex ? childGap : 0), 0)
+      : 0;
+    const blockHeight = Math.max(themeHeight, childHeight);
+    return {
+      branch,
+      children,
+      expanded,
+      side: index % 2 === 0 ? "right" : "left",
+      blockHeight
+    };
+  });
+
+  const leftGroups = groups.filter((item) => item.side === "left");
+  const rightGroups = groups.filter((item) => item.side === "right");
+  const leftHeight = leftGroups.reduce((sum, item, index) => sum + item.blockHeight + (index ? branchGap : 0), 0);
+  const rightHeight = rightGroups.reduce((sum, item, index) => sum + item.blockHeight + (index ? branchGap : 0), 0);
+  const height = Math.max(860, Math.max(leftHeight, rightHeight) + 240);
+  const centerY = height / 2;
+
+  const nodes = [];
+  const edges = [];
+  const hubX = centerX - centerNode.width / 2;
+  const hubY = centerY - centerNode.height / 2;
+  nodes.push({ ...centerNode, x: hubX, y: hubY, expanded: true });
+
+  placeMindMapSide(rightGroups, centerY - rightHeight / 2);
+  placeMindMapSide(leftGroups, centerY - leftHeight / 2);
+
+  return { width, height, nodes, edges };
+
+  function placeMindMapSide(items, startY) {
+    let cursorY = startY;
+    items.forEach((item) => {
+      const branch = item.branch;
+      const themeY = cursorY + item.blockHeight / 2 - themeHeight / 2;
+      const themeX = centerX + (item.side === "right" ? 280 : -280) - themeWidth / 2;
+      nodes.push({
+        id: branch.id,
+        role: "theme",
+        label: branch.label || "未命名主题",
+        meta: branch.meta || `${item.children.length} 个节点`,
+        description: branch.summaryZh || "该主题下包含若干相关论文与概念。",
+        x: themeX,
+        y: themeY,
+        width: themeWidth,
+        height: themeHeight,
+        expanded: item.expanded
+      });
+      edges.push({
+        type: "theme-link",
+        path: buildMindEdgePath(
+          item.side === "right"
+            ? { x: hubX + centerNode.width, y: centerY }
+            : { x: hubX, y: centerY },
+          item.side === "right"
+            ? { x: themeX, y: themeY + themeHeight / 2 }
+            : { x: themeX + themeWidth, y: themeY + themeHeight / 2 },
+          item.side
+        )
+      });
+
+      if (item.expanded && item.children.length) {
+        const totalChildrenHeight = item.children.reduce(
+          (sum, child, index) => sum + (child.type === "concept" ? conceptHeight : paperHeight) + (index ? childGap : 0),
+          0
+        );
+        let childY = cursorY + item.blockHeight / 2 - totalChildrenHeight / 2;
+        item.children.forEach((child) => {
+          const nodeHeight = child.type === "concept" ? conceptHeight : paperHeight;
+          const childX = centerX + (item.side === "right" ? 620 : -620) - leafWidth / 2;
+          nodes.push({
+            id: child.id,
+            role: child.type === "concept" ? "concept" : "paper",
+            label: child.label || "节点",
+            meta: child.meta || "",
+            description: child.type === "concept"
+              ? `${branch.label || "主题"} 下的关键概念`
+              : paperMapDescription(child.paperId, child.meta),
+            paperId: child.paperId || "",
+            x: childX,
+            y: childY,
+            width: leafWidth,
+            height: nodeHeight,
+            expanded: true
+          });
+          edges.push({
+            type: "child-link",
+            path: buildMindEdgePath(
+              item.side === "right"
+                ? { x: themeX + themeWidth, y: themeY + themeHeight / 2 }
+                : { x: themeX, y: themeY + themeHeight / 2 },
+              item.side === "right"
+                ? { x: childX, y: childY + nodeHeight / 2 }
+                : { x: childX + leafWidth, y: childY + nodeHeight / 2 },
+              item.side
+            )
+          });
+          childY += nodeHeight + childGap;
+        });
+      }
+
+      cursorY += item.blockHeight + branchGap;
+    });
+  }
+}
+
+function layoutKnowledgeGraph(graph) {
+  const width = 1520;
+  const height = 1080;
+  const center = { x: width / 2, y: height / 2 };
+  const sourceNodes = Array.isArray(graph.nodes) ? graph.nodes : [];
+  const sourceEdges = Array.isArray(graph.edges) ? graph.edges : [];
+  const nodes = sourceNodes.map((node) => ({ ...node }));
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  if (!nodes.length) {
+    return { width, height, nodes: [], edges: [] };
+  }
+
+  const hub = nodes.find((node) => node.type === "hub") || nodes[0];
+  hub.x = center.x;
+  hub.y = center.y;
+
+  const themes = nodes.filter((node) => node.type === "theme");
+  const concepts = nodes.filter((node) => node.type === "concept");
+  const papers = nodes.filter((node) => node.type === "paper");
+  const themeAngles = new Map();
+  themes.forEach((theme, index) => {
+    const angle = (-Math.PI / 2) + ((Math.PI * 2) * index / Math.max(1, themes.length));
+    themeAngles.set(theme.id, angle);
+    theme.x = center.x + Math.cos(angle) * 260;
+    theme.y = center.y + Math.sin(angle) * 260;
+  });
+
+  const groupedConcepts = groupNodesBy(concepts, "group");
+  groupedConcepts.forEach((items, groupId) => {
+    const baseAngle = themeAngles.get(groupId) ?? (-Math.PI / 2);
+    const spread = Math.min(Math.PI / 2, 0.34 + items.length * 0.1);
+    items.forEach((node, index) => {
+      const angle = items.length === 1
+        ? baseAngle
+        : baseAngle - spread / 2 + (spread * index / (items.length - 1));
+      node.x = center.x + Math.cos(angle) * 430;
+      node.y = center.y + Math.sin(angle) * 430;
+    });
+  });
+
+  const groupedPapers = groupNodesBy(papers, "group");
+  groupedPapers.forEach((items, groupId) => {
+    const baseAngle = themeAngles.get(groupId) ?? (-Math.PI / 2);
+    const spread = Math.min(Math.PI * 0.9, 0.42 + items.length * 0.12);
+    items.forEach((node, index) => {
+      const angle = items.length === 1
+        ? baseAngle
+        : baseAngle - spread / 2 + (spread * index / (items.length - 1));
+      const radius = 630 + (index % 2) * 36;
+      node.x = center.x + Math.cos(angle) * radius;
+      node.y = center.y + Math.sin(angle) * radius;
+    });
+  });
+
+  nodes.forEach((node) => {
+    if (typeof node.x !== "number" || typeof node.y !== "number") {
+      node.x = center.x;
+      node.y = center.y;
+    }
+  });
+
+  const edges = sourceEdges
+    .map((edge) => {
+      const source = byId.get(edge.source);
+      const target = byId.get(edge.target);
+      if (!source || !target) return null;
+      return { ...edge, source, target };
+    })
+    .filter(Boolean);
+
+  return { width, height, nodes, edges };
+}
+
+function groupNodesBy(nodes, key) {
+  const grouped = new Map();
+  nodes.forEach((node) => {
+    const groupKey = node?.[key] || "__ungrouped__";
+    const list = grouped.get(groupKey) || [];
+    list.push(node);
+    grouped.set(groupKey, list);
+  });
+  return grouped;
+}
+
+function truncateGraphLabel(text, maxLength) {
+  const raw = normalizeString(text);
+  if (raw.length <= maxLength) return raw;
+  return `${raw.slice(0, maxLength - 1)}…`;
+}
+
+function setKnowledgeMapPayload(payload, resetViewport = false) {
+  state.libraryMap.payload = payload;
+  const themes = Array.isArray(payload?.mindMap?.children) ? payload.mindMap.children : [];
+  state.libraryMap.expandedThemes = new Set(themes.map((item) => item.id).filter(Boolean));
+  rebuildKnowledgeMapNodeIndex(payload);
+  state.libraryMap.hoveredNodeId = "";
+  state.libraryMap.activeNodeId = defaultKnowledgeMapNodeId(payload);
+  if (resetViewport) {
+    state.libraryMap.viewport = createLibraryMapViewport(state.libraryMap.view);
+  }
+}
+
+function rebuildKnowledgeMapNodeIndex(payload) {
+  const index = new Map();
+  const stats = payload?.stats || {};
+  index.set("hub", {
+    id: "hub",
+    role: "hub",
+    label: payload?.mindMap?.label || "Paper Hub 论文知识地图",
+    meta: `${stats.paperCount || 0} 篇论文 · ${stats.themeCount || 0} 个主题`,
+    copy: payload?.summaryZh || "系统已根据当前论文库生成全库知识地图。",
+    paperId: ""
+  });
+
+  (payload?.mindMap?.children || []).forEach((theme) => {
+    index.set(theme.id, {
+      id: theme.id,
+      role: "theme",
+      label: theme.label || "未命名主题",
+      meta: theme.meta || `${(theme.children || []).length} 个节点`,
+      copy: theme.summaryZh || "该主题下包含若干相关论文与概念。",
+      paperId: ""
+    });
+    (theme.children || []).forEach((child) => {
+      index.set(child.id, {
+        id: child.id,
+        role: child.type === "concept" ? "concept" : "paper",
+        label: child.label || "节点",
+        meta: child.meta || "",
+        copy: child.type === "concept"
+          ? `${theme.label || "该主题"} 下的关键概念。`
+          : paperMapDescription(child.paperId, child.meta),
+        paperId: child.paperId || ""
+      });
+    });
+  });
+
+  (payload?.knowledgeGraph?.nodes || []).forEach((node) => {
+    if (index.has(node.id)) return;
+    index.set(node.id, {
+      id: node.id,
+      role: node.type || "node",
+      label: node.label || "Node",
+      meta: node.meta || "",
+      copy: node.meta || "图谱节点",
+      paperId: node.paperId || ""
+    });
+  });
+
+  state.libraryMap.nodeIndex = index;
+}
+
+function defaultKnowledgeMapNodeId(payload) {
+  if (!payload) return "";
+  if (payload.scope?.mode === "paper" && payload.scope?.paperId) {
+    const paperNodeId = `paper:${payload.scope.paperId}`;
+    if (state.libraryMap.nodeIndex.has(paperNodeId)) return paperNodeId;
+  }
+  return state.libraryMap.nodeIndex.has("hub") ? "hub" : [...state.libraryMap.nodeIndex.keys()][0] || "";
+}
+
+function currentKnowledgeMapNodeId() {
+  return state.libraryMap.hoveredNodeId || state.libraryMap.activeNodeId || defaultKnowledgeMapNodeId(state.libraryMap.payload);
+}
+
+function currentKnowledgeMapNode() {
+  const nodeId = currentKnowledgeMapNodeId();
+  return nodeId ? state.libraryMap.nodeIndex.get(nodeId) || null : null;
+}
+
+function syncKnowledgeMapSelection() {
+  const payload = state.libraryMap.payload;
+  const node = currentKnowledgeMapNode();
+  if (!payload || !node) {
+    elements.mapSelectionTitle.textContent = "Paper Hub 论文知识地图";
+    elements.mapSelectionMeta.textContent = "";
+    elements.mapSelectionCopy.textContent = "在图中悬停或点击节点，可以查看主题、概念和论文之间的关系。";
+    elements.mapSelectionAction.classList.add("hidden");
+    return;
+  }
+
+  const roleText = {
+    hub: "中心主题",
+    theme: "研究主题",
+    concept: "关键概念",
+    paper: "论文节点"
+  }[node.role] || "图谱节点";
+
+  elements.mapSelectionTitle.textContent = node.label || "知识地图节点";
+  elements.mapSelectionMeta.textContent = [roleText, node.meta].filter(Boolean).join(" · ");
+  elements.mapSelectionCopy.textContent = node.copy || payload.summaryZh || "图中节点可用于探索主题、概念和论文之间的关系。";
+  if (node.paperId) {
+    const paper = state.papers.find((item) => item.id === node.paperId);
+    elements.mapSelectionAction.textContent = paper ? `定位论文：${truncateGraphLabel(paper.titleZh || paper.title, 18)}` : "定位论文";
+    elements.mapSelectionAction.classList.remove("hidden");
+  } else {
+    elements.mapSelectionAction.classList.add("hidden");
+  }
+}
+
+function syncKnowledgeMapViewport() {
+  const scene = elements.mapCanvas.querySelector("[data-map-scene]");
+  const stage = elements.mapCanvas.querySelector("[data-map-stage]");
+  if (!scene || !stage) return;
+  const { x, y, scale, panning } = state.libraryMap.viewport;
+  scene.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  stage.classList.toggle("is-panning", Boolean(panning));
+}
+
+function zoomKnowledgeMap(delta, clientX = null, clientY = null) {
+  const stage = elements.mapCanvas.querySelector("[data-map-stage]");
+  if (!stage) return;
+  const current = state.libraryMap.viewport;
+  const nextScale = Math.min(current.maxScale, Math.max(current.minScale, current.scale + delta));
+  if (nextScale === current.scale) return;
+  const bounds = stage.getBoundingClientRect();
+  const originX = clientX == null ? bounds.left + bounds.width / 2 : clientX;
+  const originY = clientY == null ? bounds.top + bounds.height / 2 : clientY;
+  const localX = originX - bounds.left;
+  const localY = originY - bounds.top;
+  const worldX = (localX - current.x) / current.scale;
+  const worldY = (localY - current.y) / current.scale;
+  current.scale = Number(nextScale.toFixed(2));
+  current.x = localX - worldX * current.scale;
+  current.y = localY - worldY * current.scale;
+  syncKnowledgeMapViewport();
+}
+
+function resetKnowledgeMapViewport(forceRender = false) {
+  state.libraryMap.viewport = createLibraryMapViewport(state.libraryMap.view);
+  if (forceRender) {
+    renderKnowledgeMap();
+    return;
+  }
+  syncKnowledgeMapViewport();
+}
+
+function releaseKnowledgeMapPointer() {
+  state.libraryMap.viewport.panning = false;
+  state.libraryMap.viewport.pointerId = null;
+  syncKnowledgeMapViewport();
+}
+
+function toggleMindMapTheme(themeId) {
+  if (!themeId) return;
+  if (state.libraryMap.expandedThemes.has(themeId)) {
+    state.libraryMap.expandedThemes.delete(themeId);
+  } else {
+    state.libraryMap.expandedThemes.add(themeId);
+  }
+  state.libraryMap.activeNodeId = themeId;
+  renderKnowledgeMap();
+}
+
+function setAllMindMapThemesExpanded(expanded) {
+  if (state.libraryMap.view !== "mind" || !state.libraryMap.payload) return;
+  const themeIds = (state.libraryMap.payload.mindMap?.children || []).map((item) => item.id).filter(Boolean);
+  state.libraryMap.expandedThemes = expanded ? new Set(themeIds) : new Set();
+  renderKnowledgeMap();
+}
+
+function openActiveKnowledgeMapPaper() {
+  const node = currentKnowledgeMapNode();
+  if (!node?.paperId) return;
+  openPaperFromKnowledgeMap(node.paperId);
+}
+
+function openPaperFromKnowledgeMap(paperId) {
+  if (!paperId) return;
+  const paper = state.papers.find((item) => item.id === paperId);
+  if (!paper) return;
+  state.selectedPaperId = paperId;
+  render();
+  closeKnowledgeMapDialog();
+  setNotice(`已定位到论文：${paper.title}`);
+}
+
+function buildMindEdgePath(source, target, side) {
+  const direction = side === "right" ? 1 : -1;
+  const delta = Math.abs(target.x - source.x);
+  const control = Math.max(80, delta * 0.42);
+  return [
+    `M ${source.x.toFixed(1)} ${source.y.toFixed(1)}`,
+    `C ${(source.x + control * direction).toFixed(1)} ${source.y.toFixed(1)},`,
+    `${(target.x - control * direction).toFixed(1)} ${target.y.toFixed(1)},`,
+    `${target.x.toFixed(1)} ${target.y.toFixed(1)}`
+  ].join(" ");
+}
+
+function wrapMapLabel(text, maxChars = 16, maxLines = 2) {
+  const raw = normalizeString(text);
+  if (!raw) return [""];
+  const tokens = /\s/.test(raw) ? raw.split(/\s+/) : raw.split("");
+  const lines = [];
+  let current = "";
+  tokens.forEach((token) => {
+    const joiner = /\s/.test(raw) && current ? " " : "";
+    const next = `${current}${joiner}${token}`;
+    if (next.length <= maxChars || !current) {
+      current = next;
+      return;
+    }
+    lines.push(current);
+    current = token;
+  });
+  if (current) lines.push(current);
+  if (lines.length <= maxLines) return lines;
+  return [...lines.slice(0, maxLines - 1), truncateGraphLabel(lines.slice(maxLines - 1).join(" "), maxChars)];
+}
+
+function renderSvgTextLines(lines, x, y, lineHeight, className) {
+  return `
+    <text class="${className}" x="${x}" y="${y}">
+      ${lines.map((line, index) => `<tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`).join("")}
+    </text>
+  `;
+}
+
+function paperMapDescription(paperId, fallbackMeta = "") {
+  const paper = state.papers.find((item) => item.id === paperId);
+  if (!paper) return fallbackMeta || "论文节点";
+  return truncateGraphLabel(
+    paper.aiSummaryZh || paper.aiSummary || paper.abstract || paper.notes || fallbackMeta || "论文节点",
+    220
+  );
+}
+
 function handleProviderSelectionChange() {
   if (!state.providerConfig) return;
   state.providerConfig.selectedProvider = elements.providerSelect.value;
@@ -1433,6 +2376,22 @@ function getSelectedPaper() {
 function setView(nextView) {
   state.view = nextView;
   render();
+}
+
+function createLibraryMapViewport(view = "mind") {
+  return {
+    scale: view === "graph" ? 0.84 : 0.9,
+    x: view === "graph" ? 110 : 64,
+    y: view === "graph" ? 62 : 74,
+    minScale: 0.45,
+    maxScale: 1.8,
+    panning: false,
+    pointerId: null,
+    startX: 0,
+    startY: 0,
+    originX: 0,
+    originY: 0
+  };
 }
 
 function priorityScore(priority) {

@@ -3,6 +3,7 @@
 import base64
 import cgi
 import concurrent.futures
+import hashlib
 import json
 import mimetypes
 import os
@@ -15,12 +16,13 @@ import time
 import urllib.error
 import urllib.request
 import uuid
+import xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import datetime
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, quote, unquote, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlencode, urlparse
 
 import fitz
 from pypdf import PdfReader
@@ -33,6 +35,7 @@ COVER_DIR = STORAGE_DIR / "covers"
 RENDER_DIR = STORAGE_DIR / "renders"
 TRANSLATION_DIR = STORAGE_DIR / "translations"
 DIGEST_DIR = STORAGE_DIR / "digests"
+MAP_DIR = STORAGE_DIR / "maps"
 PROVIDER_CONFIG_PATH = ROOT / "provider_config.json"
 BULK_TRANSLATION_MAX_WORKERS = 3
 
@@ -49,6 +52,13 @@ OLLAMA_CHAT_COMPLETIONS_URL = "http://127.0.0.1:11434/v1/chat/completions"
 LMSTUDIO_CHAT_COMPLETIONS_URL = "http://127.0.0.1:1234/v1/chat/completions"
 ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages"
 GEMINI_GENERATE_CONTENT_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+ARXIV_QUERY_URL = "https://export.arxiv.org/api/query"
+ARXIV_PDF_URL = "https://arxiv.org/pdf"
+DEFAULT_HTTP_HEADERS = {
+    "User-Agent": "PaperHub/2026.03 topic-discovery (+https://127.0.0.1:8876)",
+}
+BULK_DISCOVERY_DEFAULT_LIMIT = 10
+PDF_DOWNLOAD_MAX_BYTES = 40 * 1024 * 1024
 
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("application/javascript", ".mjs")
@@ -340,6 +350,28 @@ TAG_RULES = {
     "Optimization": ["optimization", "gradient descent", "convex", "training objective"],
 }
 
+DISCOVERY_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "in",
+    "into",
+    "is",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "with",
+}
+
 
 def now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
@@ -358,6 +390,7 @@ def init_storage() -> None:
     RENDER_DIR.mkdir(exist_ok=True)
     TRANSLATION_DIR.mkdir(exist_ok=True)
     DIGEST_DIR.mkdir(exist_ok=True)
+    MAP_DIR.mkdir(exist_ok=True)
 
 
 def ensure_column(conn: sqlite3.Connection, name: str, definition: str) -> None:
@@ -729,6 +762,665 @@ def safe_filename(name: str) -> str:
     return base or "paper.pdf"
 
 
+def normalize_title_key(value: str) -> str:
+    lowered = normalize_whitespace(value).lower()
+    return re.sub(r"[^a-z0-9]+", "", lowered)
+
+
+def unique_strings(values: list[str], limit: int | None = None) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for value in values:
+        normalized = normalize_whitespace(str(value))
+        if not normalized:
+            continue
+        lowered = normalized.lower()
+        if lowered in seen:
+            continue
+        seen.add(lowered)
+        result.append(normalized)
+        if limit and len(result) >= limit:
+            break
+    return result
+
+
+def topic_terms(value: str) -> list[str]:
+    lowered = normalize_whitespace(value).lower()
+    latin_terms = re.findall(r"[a-z0-9][a-z0-9.+-]*", lowered)
+    cjk_terms = re.findall(r"[\u4e00-\u9fff]{2,}", lowered)
+    terms = [term for term in latin_terms if len(term) > 1 and term not in DISCOVERY_STOPWORDS]
+    terms.extend(cjk_terms)
+    return unique_strings(terms, limit=16)
+
+
+def keyword_match_ratio(topic: str, *texts: str) -> float:
+    terms = topic_terms(topic)
+    if not terms:
+        return 0.0
+    searchable = normalize_whitespace("\n".join(texts).lower())
+    matches = 0
+    for term in terms:
+        if term.lower() in searchable:
+            matches += 1
+    return matches / max(1, len(terms))
+
+
+def year_from_iso(value: str) -> int:
+    candidate = normalize_whitespace(value)
+    if not candidate:
+        return 0
+    try:
+        return datetime.fromisoformat(candidate.replace("Z", "+00:00")).year
+    except ValueError:
+        match = re.search(r"\b(19|20)\d{2}\b", candidate)
+        return int(match.group(0)) if match else 0
+
+
+def detect_reading_stage(title: str, summary: str, year: int) -> tuple[str, str]:
+    lowered = f"{title}\n{summary}".lower()
+    if any(token in lowered for token in ("survey", "review", "overview", "tutorial", "introduction to")):
+        return ("survey", "先读：综述/教程型论文，适合快速建立主题全景。")
+    current_year = datetime.now().year
+    if year and year <= current_year - 4:
+        return ("foundation", "其次：基础或早期代表工作，便于建立方法主干。")
+    return ("frontier", "后读：近年扩展或前沿工作，适合在主干建立后进入。")
+
+
+def craap_scores_for_candidate(topic: str, candidate: dict) -> dict:
+    year = normalize_number(candidate.get("year"), 0)
+    title = normalize_whitespace(str(candidate.get("title") or ""))
+    summary = normalize_whitespace(str(candidate.get("summary") or ""))
+    journal_ref = normalize_whitespace(str(candidate.get("journalRef") or ""))
+    doi = normalize_whitespace(str(candidate.get("doi") or ""))
+    comment = normalize_whitespace(str(candidate.get("comment") or ""))
+    categories = " ".join(parse_string_list(candidate.get("categories")))
+    term_ratio = keyword_match_ratio(topic, title, summary, categories)
+
+    current_year = datetime.now().year
+    age = current_year - year if year else 12
+    if age <= 2:
+        currency = 20
+    elif age <= 4:
+        currency = 18
+    elif age <= 7:
+        currency = 15
+    elif age <= 10:
+        currency = 12
+    elif age <= 15:
+        currency = 9
+    else:
+        currency = 6
+
+    phrase_bonus = 4 if normalize_whitespace(topic).lower() in f"{title} {summary}".lower() else 0
+    relevance = min(20, round(8 + term_ratio * 12 + phrase_bonus))
+
+    authority = 6
+    if doi:
+        authority += 6
+    if journal_ref:
+        authority += 5
+    author_count = len(parse_string_list(candidate.get("authors")))
+    authority += min(5, author_count)
+    if parse_string_list(candidate.get("categories")):
+        authority += 2
+    if candidate.get("pdfUrl"):
+        authority += 1
+    authority = min(20, authority)
+
+    accuracy = 7
+    if len(summary) >= 500:
+        accuracy += 6
+    elif len(summary) >= 220:
+        accuracy += 4
+    elif len(summary) >= 120:
+        accuracy += 2
+    if candidate.get("pdfUrl"):
+        accuracy += 3
+    if doi or journal_ref:
+        accuracy += 4
+    if not any(token in f"{title} {summary} {comment}".lower() for token in ("withdrawn", "retracted")):
+        accuracy += 3
+    accuracy = min(20, accuracy)
+
+    purpose = 12
+    if any(token in f"{title} {summary}".lower() for token in ("survey", "review", "overview", "tutorial")):
+        purpose += 5
+    if len(summary) >= 160:
+        purpose += 2
+    if not any(token in f"{title} {summary}".lower() for token in ("advertisement", "sponsored", "product")):
+        purpose += 1
+    purpose = min(20, purpose)
+
+    total = currency + relevance + authority + accuracy + purpose
+    return {
+        "currency": currency,
+        "relevance": relevance,
+        "authority": authority,
+        "accuracy": accuracy,
+        "purpose": purpose,
+        "total": total,
+    }
+
+
+def reading_order_score(topic: str, candidate: dict) -> tuple[float, str, str]:
+    scores = candidate.get("craap", {})
+    stage, stage_reason = detect_reading_stage(
+        str(candidate.get("title") or ""),
+        str(candidate.get("summary") or ""),
+        normalize_number(candidate.get("year"), 0),
+    )
+    base = float(normalize_number(scores.get("total"), 0))
+    stage_bonus = {"survey": 18.0, "foundation": 10.0, "frontier": 4.0}.get(stage, 0.0)
+    relevance_bonus = float(normalize_number(scores.get("relevance"), 0)) * 0.7
+    authority_bonus = float(normalize_number(scores.get("authority"), 0)) * 0.35
+    score = round(base * 0.72 + stage_bonus + relevance_bonus + authority_bonus, 2)
+    return score, stage, stage_reason
+
+
+def call_ai_discovery_evaluation(topic: str, candidates: list[dict]) -> dict:
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "evaluations": {
+                "type": "array",
+                "maxItems": 20,
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "id": {"type": "string"},
+                        "currency": {"type": "integer", "minimum": 0, "maximum": 20},
+                        "relevance": {"type": "integer", "minimum": 0, "maximum": 20},
+                        "authority": {"type": "integer", "minimum": 0, "maximum": 20},
+                        "accuracy": {"type": "integer", "minimum": 0, "maximum": 20},
+                        "purpose": {"type": "integer", "minimum": 0, "maximum": 20},
+                        "reading_stage": {"type": "string", "enum": ["survey", "foundation", "frontier"]},
+                        "reason_zh": {"type": "string"},
+                    },
+                    "required": [
+                        "id",
+                        "currency",
+                        "relevance",
+                        "authority",
+                        "accuracy",
+                        "purpose",
+                        "reading_stage",
+                        "reason_zh",
+                    ],
+                },
+            }
+        },
+        "required": ["evaluations"],
+    }
+    compact_candidates = [
+        {
+            "id": item.get("id", ""),
+            "title": item.get("title", ""),
+            "summary": normalize_multiline_text(str(item.get("summary") or ""), limit=1200),
+            "authors": parse_string_list(item.get("authors"))[:5],
+            "year": item.get("year", 0),
+            "journal_ref": item.get("journalRef", ""),
+            "doi": item.get("doi", ""),
+            "categories": parse_string_list(item.get("categories"))[:6],
+            "comment": item.get("comment", ""),
+        }
+        for item in candidates[:20]
+    ]
+    system_prompt = (
+        "You evaluate academic papers for topic discovery using the CRAAP framework. "
+        "Judge semantic relevance to the topic, not exact title matching. "
+        "A paper can score high on relevance when its abstract and method are clearly related even if the title words differ. "
+        "Return concise practical Simplified Chinese reasons. "
+        "Use reading_stage=survey for surveys/tutorials/overviews, foundation for core classic or foundational works, "
+        "and frontier for newer extensions or specialized advances."
+    )
+    user_prompt = (
+        f"研究主题：{normalize_whitespace(topic)}\n"
+        "请对下面候选论文逐篇做 CRAAP 打分，并给出推荐阅读阶段。"
+        "相关即可，不要求标题和主题逐字对应；请重点看摘要是否真的服务于该主题。\n"
+        f"{json.dumps(compact_candidates, ensure_ascii=False)}"
+    )
+    return call_ai_json(system_prompt, user_prompt, schema, timeout=90)
+
+
+def apply_ai_discovery_evaluation(topic: str, candidates: list[dict]) -> tuple[list[dict], str, str]:
+    if not ai_enabled() or not candidates:
+        return candidates, "heuristic", ""
+
+    try:
+        payload = call_ai_discovery_evaluation(topic, candidates)
+    except Exception:
+        return candidates, "heuristic", ""
+
+    evaluations = payload.get("evaluations")
+    if not isinstance(evaluations, list):
+        return candidates, "heuristic", ""
+
+    by_id = {}
+    for item in evaluations:
+        if not isinstance(item, dict):
+            continue
+        candidate_id = normalize_whitespace(str(item.get("id") or ""))
+        if not candidate_id:
+            continue
+        by_id[candidate_id] = item
+
+    if not by_id:
+        return candidates, "heuristic", ""
+
+    for candidate in candidates:
+        evaluation = by_id.get(normalize_whitespace(str(candidate.get("id") or "")))
+        if not evaluation:
+            continue
+        craap = {
+            "currency": max(0, min(20, normalize_number(evaluation.get("currency"), candidate["craap"]["currency"]))),
+            "relevance": max(0, min(20, normalize_number(evaluation.get("relevance"), candidate["craap"]["relevance"]))),
+            "authority": max(0, min(20, normalize_number(evaluation.get("authority"), candidate["craap"]["authority"]))),
+            "accuracy": max(0, min(20, normalize_number(evaluation.get("accuracy"), candidate["craap"]["accuracy"]))),
+            "purpose": max(0, min(20, normalize_number(evaluation.get("purpose"), candidate["craap"]["purpose"]))),
+        }
+        craap["total"] = craap["currency"] + craap["relevance"] + craap["authority"] + craap["accuracy"] + craap["purpose"]
+        candidate["craap"] = craap
+        candidate["readingStage"] = normalize_whitespace(str(evaluation.get("reading_stage") or candidate.get("readingStage") or "frontier")) or "frontier"
+        candidate["recommendationReason"] = normalize_whitespace(str(evaluation.get("reason_zh") or candidate.get("recommendationReason") or ""))
+        candidate["readingOrderScore"] = round(
+            craap["total"] * 0.78
+            + craap["relevance"] * 0.9
+            + {"survey": 16.0, "foundation": 9.0, "frontier": 4.0}.get(candidate["readingStage"], 0.0),
+            2,
+        )
+
+    return candidates, "ai", current_ai_model()
+
+
+def http_get(url: str, timeout: int = 30) -> bytes:
+    request = urllib.request.Request(url, headers=DEFAULT_HTTP_HEADERS, method="GET")
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return response.read()
+
+
+def translate_topic_for_discovery(topic: str) -> dict:
+    normalized = normalize_whitespace(topic)
+    payload = {
+        "topic": normalized,
+        "searchQuery": normalized,
+        "keywords": topic_terms(normalized),
+        "warning": "",
+    }
+    if not contains_cjk(normalized) or not ai_enabled():
+        if contains_cjk(normalized) and not ai_enabled():
+            payload["warning"] = "检测到中文主题，但当前未配置 AI，检索将直接使用原词，命中率可能偏低。"
+        return payload
+
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "query_en": {"type": "string"},
+            "keywords_en": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+        },
+        "required": ["query_en", "keywords_en"],
+    }
+    system_prompt = (
+        "You rewrite a Chinese research topic into a short English search query for arXiv. "
+        "Use concise academic English nouns and phrases only."
+    )
+    user_prompt = f"把这个中文研究主题改写成适合 arXiv 检索的英文主题：{normalized}"
+    try:
+        translated = call_ai_json(system_prompt, user_prompt, schema, timeout=30)
+    except Exception:
+        payload["warning"] = "中文主题英文改写失败，已退回原始主题检索。"
+        return payload
+
+    query_en = normalize_whitespace(str(translated.get("query_en") or ""))
+    keywords_en = unique_strings(parse_string_list(translated.get("keywords_en")), limit=6)
+    if query_en:
+        payload["searchQuery"] = query_en
+        payload["keywords"] = unique_strings([query_en, *keywords_en], limit=8)
+    return payload
+
+
+def arxiv_search_expression(search_query: str, keyword_hints: list[str]) -> str:
+    primary = normalize_whitespace(search_query)
+    if not primary:
+        raise ValueError("missing search query")
+    segments = [f'all:"{primary}"']
+    for keyword in keyword_hints[:4]:
+        normalized = normalize_whitespace(keyword)
+        if not normalized or normalized.lower() == primary.lower():
+            continue
+        segments.append(f'all:"{normalized}"')
+    return " OR ".join(segments)
+
+
+def search_arxiv_papers(topic: str, limit: int = BULK_DISCOVERY_DEFAULT_LIMIT) -> dict:
+    normalized_topic = normalize_whitespace(topic)
+    if not normalized_topic:
+        raise ValueError("missing topic")
+
+    rewritten = translate_topic_for_discovery(normalized_topic)
+    expression = arxiv_search_expression(rewritten["searchQuery"], rewritten["keywords"])
+    params = urlencode(
+        {
+            "search_query": expression,
+            "start": 0,
+            "max_results": max(1, min(20, limit)),
+            "sortBy": "relevance",
+            "sortOrder": "descending",
+        }
+    )
+    try:
+        raw = http_get(f"{ARXIV_QUERY_URL}?{params}", timeout=45)
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"主题检索失败：{exc.reason}") from exc
+
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError as exc:
+        raise RuntimeError("arXiv 返回了无法解析的数据") from exc
+
+    ns = {"atom": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas/atom"}
+    results: list[dict] = []
+    for entry in root.findall("atom:entry", ns):
+        paper_url = normalize_whitespace(entry.findtext("atom:id", default="", namespaces=ns))
+        if not paper_url:
+            continue
+        raw_id = paper_url.rstrip("/").split("/")[-1]
+        pdf_url = ""
+        for link in entry.findall("atom:link", ns):
+            title = link.attrib.get("title", "")
+            href = link.attrib.get("href", "")
+            if title == "pdf" or href.endswith(".pdf"):
+                pdf_url = href
+                break
+        if not pdf_url and raw_id:
+            pdf_url = f"{ARXIV_PDF_URL}/{raw_id}.pdf"
+
+        title = normalize_whitespace(entry.findtext("atom:title", default="", namespaces=ns))
+        summary = normalize_whitespace(entry.findtext("atom:summary", default="", namespaces=ns))
+        authors = unique_strings(
+            [
+                author.findtext("atom:name", default="", namespaces=ns)
+                for author in entry.findall("atom:author", ns)
+            ],
+            limit=12,
+        )
+        published = normalize_whitespace(entry.findtext("atom:published", default="", namespaces=ns))
+        updated = normalize_whitespace(entry.findtext("atom:updated", default="", namespaces=ns))
+        year = year_from_iso(published or updated)
+        doi = normalize_whitespace(entry.findtext("arxiv:doi", default="", namespaces=ns))
+        journal_ref = normalize_whitespace(entry.findtext("arxiv:journal_ref", default="", namespaces=ns))
+        comment = normalize_whitespace(entry.findtext("arxiv:comment", default="", namespaces=ns))
+        primary_category = ""
+        primary_node = entry.find("arxiv:primary_category", ns)
+        if primary_node is not None:
+            primary_category = normalize_whitespace(primary_node.attrib.get("term", ""))
+        categories = unique_strings(
+            [
+                category.attrib.get("term", "")
+                for category in entry.findall("atom:category", ns)
+            ],
+            limit=8,
+        )
+        candidate = {
+            "source": "arxiv",
+            "sourceLabel": "arXiv",
+            "topic": normalized_topic,
+            "searchQuery": rewritten["searchQuery"],
+            "warning": rewritten["warning"],
+            "id": raw_id,
+            "title": title,
+            "summary": summary,
+            "authors": authors,
+            "year": year,
+            "publishedAt": published,
+            "updatedAt": updated,
+            "doi": doi,
+            "journalRef": journal_ref,
+            "comment": comment,
+            "primaryCategory": primary_category,
+            "categories": categories,
+            "url": paper_url,
+            "pdfUrl": pdf_url,
+        }
+        relevance_topic = rewritten["searchQuery"] or normalized_topic
+        candidate["craap"] = craap_scores_for_candidate(relevance_topic, candidate)
+        recommendation_score, stage, stage_reason = reading_order_score(relevance_topic, candidate)
+        candidate["readingOrderScore"] = recommendation_score
+        candidate["readingStage"] = stage
+        candidate["recommendationReason"] = stage_reason
+        results.append(candidate)
+
+    results, evaluation_source, evaluation_model = apply_ai_discovery_evaluation(normalized_topic, results)
+
+    results.sort(
+        key=lambda item: (
+            {"survey": 0, "foundation": 1, "frontier": 2}.get(item.get("readingStage", ""), 3),
+            -float(item.get("readingOrderScore", 0)),
+            -normalize_number(item.get("year"), 0),
+            item.get("title", ""),
+        )
+    )
+    for index, candidate in enumerate(results, start=1):
+        candidate["recommendedOrder"] = index
+    return {
+        "topic": normalized_topic,
+        "searchQuery": rewritten["searchQuery"],
+        "warning": rewritten["warning"],
+        "evaluationSource": evaluation_source,
+        "evaluationModel": evaluation_model,
+        "results": results,
+    }
+
+
+def download_pdf_to_path(pdf_url: str, target_path: Path) -> None:
+    temp_path = target_path.with_suffix(target_path.suffix + ".part")
+    request = urllib.request.Request(pdf_url, headers=DEFAULT_HTTP_HEADERS, method="GET")
+    try:
+        with urllib.request.urlopen(request, timeout=90) as response, temp_path.open("wb") as handle:
+            first_chunk = b""
+            total = 0
+            while True:
+                chunk = response.read(65536)
+                if not chunk:
+                    break
+                if not first_chunk:
+                    first_chunk = chunk[:8]
+                total += len(chunk)
+                if total > PDF_DOWNLOAD_MAX_BYTES:
+                    raise RuntimeError("PDF 文件过大，已停止下载。")
+                handle.write(chunk)
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        if temp_path.exists():
+            temp_path.unlink()
+        raise RuntimeError(f"PDF 下载失败：HTTP {exc.code} {detail[:160]}") from exc
+    except urllib.error.URLError as exc:
+        if temp_path.exists():
+            temp_path.unlink()
+        raise RuntimeError(f"PDF 下载失败：{exc.reason}") from exc
+    except Exception:
+        if temp_path.exists():
+            temp_path.unlink()
+        raise
+
+    header = temp_path.read_bytes()[:8] if temp_path.exists() else b""
+    if not header.startswith(b"%PDF"):
+        temp_path.unlink(missing_ok=True)
+        raise RuntimeError("下载结果不是合法 PDF，可能被源站拒绝或跳转。")
+    temp_path.replace(target_path)
+
+
+def find_existing_paper_for_candidate(candidate: dict) -> dict | None:
+    doi = normalize_whitespace(str(candidate.get("doi") or ""))
+    url = normalize_whitespace(str(candidate.get("url") or ""))
+    title_key = normalize_title_key(str(candidate.get("title") or ""))
+    with connect_db() as conn:
+        if doi:
+            row = conn.execute("SELECT * FROM papers WHERE lower(doi) = lower(?) LIMIT 1", (doi,)).fetchone()
+            if row:
+                return row_to_paper(row)
+        if url:
+            row = conn.execute("SELECT * FROM papers WHERE lower(url) = lower(?) LIMIT 1", (url,)).fetchone()
+            if row:
+                return row_to_paper(row)
+        rows = conn.execute("SELECT * FROM papers").fetchall()
+    for row in rows:
+        paper = row_to_paper(row)
+        if title_key and normalize_title_key(paper.get("title", "")) == title_key:
+            return paper
+    return None
+
+
+def import_topic_candidate(candidate: dict, topic: str, rank: int) -> dict:
+    existing = find_existing_paper_for_candidate(candidate)
+    if existing and existing.get("pdfPath"):
+        return {
+            "status": "existing",
+            "message": "论文已存在且本地 PDF 已就绪，跳过下载。",
+            "paper": existing,
+        }
+
+    paper_id = existing["id"] if existing else str(uuid.uuid4())
+    original_name = safe_filename(f"{candidate.get('title') or 'paper'}.pdf")
+    target_path = PDF_DIR / f"{paper_id}_{original_name}"
+    download_pdf_to_path(str(candidate.get("pdfUrl") or ""), target_path)
+
+    extracted = extract_pdf_profile(paper_id, target_path, original_name)
+    title = normalize_whitespace(str(candidate.get("title") or extracted.get("title") or "Imported PDF"))
+    abstract = normalize_whitespace(str(candidate.get("summary") or extracted.get("abstract") or ""))
+    tags = unique_strings(
+        [
+            *parse_string_list(extracted.get("tags")),
+            *infer_tags(title, abstract or title),
+            *(topic_terms(topic)[:4]),
+        ],
+        limit=8,
+    )
+    category = extracted.get("category") or infer_category(tags, title)
+    collection = (existing.get("collection") if existing else "") or normalize_whitespace(topic)[:80]
+    base_payload = {
+        "id": paper_id,
+        "title": title,
+        "titleZh": existing.get("titleZh", "") if existing else "",
+        "authors": parse_string_list(candidate.get("authors")) or parse_string_list(extracted.get("authors")),
+        "year": normalize_number(candidate.get("year"), extracted.get("year", 0)),
+        "venue": normalize_whitespace(str(candidate.get("journalRef") or candidate.get("sourceLabel") or extracted.get("venue") or "arXiv")),
+        "doi": normalize_whitespace(str((candidate.get("doi") or (existing.get("doi", "") if existing else "")) or "")),
+        "url": normalize_whitespace(str((candidate.get("url") or (existing.get("url", "") if existing else "")) or "")),
+        "status": existing.get("status") if existing else "to-read",
+        "priority": existing.get("priority") if existing else ("high" if rank <= 3 else "medium"),
+        "rating": existing.get("rating", 0) if existing else 0,
+        "favorite": existing.get("favorite", False) if existing else False,
+        "collection": collection,
+        "category": category,
+        "tags": tags,
+        "aiKeywords": unique_strings([*parse_string_list(candidate.get("categories")), *tags], limit=8),
+        "abstract": abstract,
+        "aiSummary": existing.get("aiSummary", "") if existing else abstract[:220],
+        "aiSummaryZh": existing.get("aiSummaryZh", "") if existing else "",
+        "notes": existing.get("notes", "") if existing else "",
+        "coverImage": extracted.get("coverImage", ""),
+        "coverSource": extracted.get("coverSource", "generated"),
+        "pdfPath": str(target_path.relative_to(ROOT)),
+        "originalFilename": original_name,
+        "readerTotalPages": extracted.get("readerTotalPages", 0),
+        "readerPage": existing.get("readerPage", 1) if existing else 1,
+        "readerScroll": existing.get("readerScroll", 0) if existing else 0,
+        "readerZoom": existing.get("readerZoom", 1) if existing else 1,
+        "lastReadAt": existing.get("lastReadAt", "") if existing else "",
+        "aiModel": existing.get("aiModel", "") if existing else "",
+        "aiEnrichedAt": existing.get("aiEnrichedAt", "") if existing else "",
+        "aiConfidence": existing.get("aiConfidence", 0) if existing else 0,
+        "addedAt": existing.get("addedAt", now_iso()) if existing else now_iso(),
+        "updatedAt": now_iso(),
+    }
+    payload = normalize_paper_payload(base_payload)
+
+    if existing:
+        updated = update_paper(paper_id, payload)
+        if not updated:
+            raise RuntimeError("更新已存在论文失败。")
+        return {
+            "status": "updated",
+            "message": "已补齐本地 PDF 并刷新元数据。",
+            "paper": updated,
+        }
+
+    with connect_db() as conn:
+        insert_paper(conn, payload)
+    return {
+        "status": "imported",
+        "message": "已下载 PDF 并导入论文库。",
+        "paper": get_paper(paper_id),
+    }
+
+
+def build_topic_reading_strategy(recommendations: list[dict]) -> list[str]:
+    if not recommendations:
+        return ["当前没有找到可下载的开放 PDF 论文。"]
+    stages = [item.get("readingStage") for item in recommendations[:6]]
+    strategy = []
+    if "survey" in stages:
+        strategy.append("先读综述/教程型论文，快速建立主题地图和关键词。")
+    if "foundation" in stages:
+        strategy.append("再读高 CRAAP 的基础代表作，抓住核心方法主线。")
+    if "frontier" in stages:
+        strategy.append("最后读近年的前沿扩展工作，用来更新视角和找论文线索。")
+    if not strategy:
+        strategy.append("按 CRAAP 总分从高到低阅读，优先处理相关性和权威性都高的论文。")
+    return strategy[:3]
+
+
+def discover_and_import_topic(topic: str, limit: int = BULK_DISCOVERY_DEFAULT_LIMIT, auto_download_count: int = 5) -> dict:
+    discovery = search_arxiv_papers(topic, limit=limit)
+    results = discovery["results"]
+    auto_download_count = max(0, min(10, auto_download_count))
+    imported_count = 0
+    updated_count = 0
+    existing_count = 0
+    failed_count = 0
+
+    for candidate in results[:auto_download_count]:
+        try:
+            import_result = import_topic_candidate(candidate, discovery["topic"], candidate["recommendedOrder"])
+            candidate["importStatus"] = import_result["status"]
+            candidate["importMessage"] = import_result["message"]
+            candidate["paperId"] = import_result["paper"]["id"] if import_result.get("paper") else ""
+            if import_result["status"] == "imported":
+                imported_count += 1
+            elif import_result["status"] == "updated":
+                updated_count += 1
+            else:
+                existing_count += 1
+        except Exception as exc:
+            candidate["importStatus"] = "failed"
+            candidate["importMessage"] = str(exc)
+            candidate["paperId"] = ""
+            failed_count += 1
+
+    for candidate in results[auto_download_count:]:
+        candidate["importStatus"] = "not_requested"
+        candidate["importMessage"] = "未进入自动下载名额。"
+        candidate["paperId"] = ""
+
+    return {
+        "topic": discovery["topic"],
+        "searchQuery": discovery["searchQuery"],
+        "warning": discovery["warning"],
+        "source": "arXiv",
+        "limit": max(1, min(20, limit)),
+        "autoDownloadCount": auto_download_count,
+        "results": results,
+        "readingStrategy": build_topic_reading_strategy(results),
+        "importedCount": imported_count,
+        "updatedCount": updated_count,
+        "existingCount": existing_count,
+        "failedCount": failed_count,
+    }
+
+
 def looks_like_title(text: str) -> bool:
     candidate = normalize_whitespace(text)
     if len(candidate) < 12 or len(candidate) > 240:
@@ -787,6 +1479,100 @@ def load_digest_cache(paper_id: str) -> dict | None:
 
 def save_digest_cache(paper_id: str, payload: dict) -> None:
     digest_cache_path(paper_id).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def map_cache_path(scope_key: str) -> Path:
+    normalized = re.sub(r"[^A-Za-z0-9._-]+", "_", scope_key).strip("_") or "library_map"
+    return MAP_DIR / f"{normalized}.json"
+
+
+def load_library_map_cache(scope_key: str = "library_map") -> dict | None:
+    cache_path = map_cache_path(scope_key)
+    if not cache_path.exists():
+        return None
+    try:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def save_library_map_cache(payload: dict, scope_key: str = "library_map") -> None:
+    cache_path = map_cache_path(scope_key)
+    cache_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def library_map_fingerprint(papers: list[dict]) -> str:
+    compact = [
+        {
+            "id": paper.get("id", ""),
+            "title": paper.get("title", ""),
+            "titleZh": paper.get("titleZh", ""),
+            "category": paper.get("category", ""),
+            "collection": paper.get("collection", ""),
+            "tags": paper.get("tags", []),
+            "aiKeywords": paper.get("aiKeywords", []),
+            "updatedAt": paper.get("updatedAt", ""),
+        }
+        for paper in sorted(papers, key=lambda item: item.get("id", ""))
+    ]
+    raw = json.dumps(compact, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    return hashlib.sha1(raw).hexdigest()
+
+
+def graph_safe_id(prefix: str, value: str) -> str:
+    normalized = normalize_whitespace(value).lower()
+    slug = re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "-", normalized).strip("-")
+    if not slug:
+        slug = hashlib.sha1(value.encode("utf-8", errors="ignore")).hexdigest()[:10]
+    return f"{prefix}:{slug}"
+
+
+def paper_display_title(paper: dict) -> str:
+    return normalize_whitespace(str(paper.get("titleZh") or paper.get("title") or "Untitled Paper"))
+
+
+def paper_graph_meta(paper: dict) -> str:
+    parts = []
+    if paper.get("year"):
+        parts.append(str(paper["year"]))
+    if paper.get("venue"):
+        parts.append(str(paper["venue"]))
+    tags = parse_string_list(paper.get("tags"))
+    if tags:
+        parts.append(" / ".join(tags[:3]))
+    return " · ".join(parts)
+
+
+def pick_paper_theme(paper: dict) -> str:
+    collection = normalize_whitespace(str(paper.get("collection") or ""))
+    category = normalize_whitespace(str(paper.get("category") or ""))
+    if collection:
+        return collection
+    if category:
+        return category
+    tags = parse_string_list(paper.get("tags"))
+    if tags:
+        return tags[0]
+    return "未分类"
+
+
+def local_theme_relations(themes: list[dict]) -> list[dict]:
+    relations: list[dict] = []
+    for index, left in enumerate(themes):
+        left_concepts = set(parse_string_list(left.get("concepts")))
+        for right in themes[index + 1 :]:
+            right_concepts = set(parse_string_list(right.get("concepts")))
+            overlap = sorted(left_concepts & right_concepts)
+            if overlap:
+                relations.append(
+                    {
+                        "sourceThemeId": left["id"],
+                        "targetThemeId": right["id"],
+                        "label": f"共享概念：{overlap[0]}",
+                    }
+                )
+    return relations[:10]
 
 
 def normalize_multiline_text(value: str, limit: int = 3200) -> str:
@@ -2518,6 +3304,529 @@ def get_paper_digest(paper_id: str, refresh: bool = False) -> dict:
     return payload
 
 
+def build_library_map_payload(
+    papers: list[dict],
+    themes: list[dict],
+    source: str,
+    summary_zh: str,
+    insights_zh: list[str],
+    ai_model: str = "",
+    theme_relations: list[dict] | None = None,
+    message: str = "",
+) -> dict:
+    paper_lookup = {paper["id"]: paper for paper in papers}
+    category_count = len(
+        {
+            normalize_whitespace(str(paper.get("category") or ""))
+            for paper in papers
+            if normalize_whitespace(str(paper.get("category") or ""))
+        }
+    )
+    collection_count = len(
+        {
+            normalize_whitespace(str(paper.get("collection") or ""))
+            for paper in papers
+            if normalize_whitespace(str(paper.get("collection") or ""))
+        }
+    )
+    tag_count = len({tag for paper in papers for tag in parse_string_list(paper.get("tags"))})
+
+    mind_children: list[dict] = []
+    nodes = [{"id": "hub", "label": "Paper Hub", "type": "hub", "group": "hub", "size": 34, "meta": f"{len(papers)} papers"}]
+    node_ids = {"hub"}
+    edges: list[dict] = []
+    assigned_papers: set[str] = set()
+
+    for theme in themes:
+        label = normalize_whitespace(str(theme.get("label") or "未命名主题")) or "未命名主题"
+        theme_ref = normalize_whitespace(str(theme.get("id") or label or "theme")) or label
+        theme_id = graph_safe_id("theme", theme_ref)
+        summary = normalize_multiline_text(str(theme.get("summaryZh") or theme.get("summary_zh") or ""), limit=420) or f"{label} 主题论文集合"
+        concepts = parse_string_list(theme.get("concepts"))[:6]
+        paper_ids = [paper_id for paper_id in parse_string_list(theme.get("paperIds") or theme.get("paper_ids")) if paper_id in paper_lookup]
+        if not paper_ids:
+            continue
+
+        nodes.append(
+            {
+                "id": theme_id,
+                "label": label,
+                "type": "theme",
+                "group": theme_id,
+                "size": max(22, min(40, 18 + len(paper_ids) * 2)),
+                "meta": f"{len(paper_ids)} 篇论文",
+            }
+        )
+        node_ids.add(theme_id)
+        edges.append({"source": "hub", "target": theme_id, "label": "主题", "strength": 1})
+
+        branch_children: list[dict] = []
+        for concept in concepts:
+            concept_id = graph_safe_id("concept", f"{label}-{concept}")
+            if concept_id not in node_ids:
+                nodes.append(
+                    {
+                        "id": concept_id,
+                        "label": concept,
+                        "type": "concept",
+                        "group": theme_id,
+                        "size": 16,
+                        "meta": label,
+                    }
+                )
+                node_ids.add(concept_id)
+            edges.append({"source": theme_id, "target": concept_id, "label": "关键概念", "strength": 0.72})
+            branch_children.append(
+                {
+                    "id": concept_id,
+                    "label": f"概念 · {concept}",
+                    "type": "concept",
+                    "meta": "关键概念",
+                }
+            )
+
+        for paper_id in paper_ids:
+            paper = paper_lookup[paper_id]
+            assigned_papers.add(paper_id)
+            paper_node_id = f"paper:{paper_id}"
+            if paper_node_id not in node_ids:
+                nodes.append(
+                    {
+                        "id": paper_node_id,
+                        "label": paper_display_title(paper),
+                        "type": "paper",
+                        "group": theme_id,
+                        "paperId": paper_id,
+                        "size": max(14, min(24, 14 + normalize_number(paper.get("rating"), 0) + (2 if paper.get("favorite") else 0))),
+                        "meta": paper_graph_meta(paper),
+                    }
+                )
+                node_ids.add(paper_node_id)
+            edges.append({"source": theme_id, "target": paper_node_id, "label": "代表论文", "strength": 0.9})
+            branch_children.append(
+                {
+                    "id": paper_node_id,
+                    "label": paper_display_title(paper),
+                    "type": "paper",
+                    "meta": paper_graph_meta(paper),
+                    "paperId": paper_id,
+                }
+            )
+
+        mind_children.append(
+            {
+                "id": theme_id,
+                "label": label,
+                "type": "theme",
+                "meta": f"{len(paper_ids)} 篇论文",
+                "summaryZh": summary,
+                "children": branch_children,
+            }
+        )
+
+    remaining_papers = [paper for paper in papers if paper["id"] not in assigned_papers]
+    if remaining_papers:
+        other_theme_id = graph_safe_id("theme", "其他线索")
+        if other_theme_id not in node_ids:
+            nodes.append(
+                {
+                    "id": other_theme_id,
+                    "label": "其他线索",
+                    "type": "theme",
+                    "group": other_theme_id,
+                    "size": max(20, min(34, 18 + len(remaining_papers) * 2)),
+                    "meta": f"{len(remaining_papers)} 篇论文",
+                }
+            )
+            node_ids.add(other_theme_id)
+        edges.append({"source": "hub", "target": other_theme_id, "label": "补充", "strength": 0.78})
+        other_children = []
+        for paper in remaining_papers:
+            paper_node_id = f"paper:{paper['id']}"
+            if paper_node_id not in node_ids:
+                nodes.append(
+                    {
+                        "id": paper_node_id,
+                        "label": paper_display_title(paper),
+                        "type": "paper",
+                        "group": other_theme_id,
+                        "paperId": paper["id"],
+                        "size": 14,
+                        "meta": paper_graph_meta(paper),
+                    }
+                )
+                node_ids.add(paper_node_id)
+            edges.append({"source": other_theme_id, "target": paper_node_id, "label": "相关论文", "strength": 0.75})
+            other_children.append(
+                {
+                    "id": paper_node_id,
+                    "label": paper_display_title(paper),
+                    "type": "paper",
+                    "meta": paper_graph_meta(paper),
+                    "paperId": paper["id"],
+                }
+            )
+        mind_children.append(
+            {
+                "id": other_theme_id,
+                "label": "其他线索",
+                "type": "theme",
+                "meta": f"{len(remaining_papers)} 篇论文",
+                "summaryZh": "当前还没有被稳定归入核心主题的论文。",
+                "children": other_children,
+            }
+        )
+
+    for relation in theme_relations or []:
+        source_theme_id = graph_safe_id("theme", str(relation.get("sourceThemeId") or ""))
+        target_theme_id = graph_safe_id("theme", str(relation.get("targetThemeId") or ""))
+        if source_theme_id in node_ids and target_theme_id in node_ids and source_theme_id != target_theme_id:
+            edges.append(
+                {
+                    "source": source_theme_id,
+                    "target": target_theme_id,
+                    "label": normalize_whitespace(str(relation.get("label") or "主题关联")) or "主题关联",
+                    "strength": 0.56,
+                }
+            )
+
+    return {
+        "source": source,
+        "updatedAt": now_iso(),
+        "aiModel": ai_model,
+        "message": message,
+        "summaryZh": normalize_multiline_text(summary_zh, limit=1200),
+        "insightsZh": [normalize_whitespace(str(item)) for item in insights_zh if normalize_whitespace(str(item))][:6],
+        "stats": {
+            "paperCount": len(papers),
+            "themeCount": len(mind_children),
+            "categoryCount": category_count,
+            "collectionCount": collection_count,
+            "tagCount": tag_count,
+        },
+        "mindMap": {
+            "label": "Paper Hub 论文知识地图",
+            "children": mind_children,
+        },
+        "knowledgeGraph": {
+            "nodes": nodes,
+            "edges": edges,
+        },
+    }
+
+
+def build_local_library_map(papers: list[dict], message: str = "") -> dict:
+    if not papers:
+        return {
+            "source": "local",
+            "updatedAt": now_iso(),
+            "aiModel": "",
+            "message": message,
+            "summaryZh": "当前论文库为空，导入论文后即可自动生成思维导图和知识图谱。",
+            "insightsZh": [],
+            "stats": {"paperCount": 0, "themeCount": 0, "categoryCount": 0, "collectionCount": 0, "tagCount": 0},
+            "mindMap": {"label": "Paper Hub 论文知识地图", "children": []},
+            "knowledgeGraph": {"nodes": [], "edges": []},
+        }
+
+    theme_buckets: dict[str, list[dict]] = {}
+    for paper in papers:
+        theme_buckets.setdefault(pick_paper_theme(paper), []).append(paper)
+
+    sorted_themes = sorted(theme_buckets.items(), key=lambda item: (-len(item[1]), item[0]))
+    themes: list[dict] = []
+    all_tags = Counter(tag for paper in papers for tag in parse_string_list(paper.get("tags")))
+    all_status = Counter(normalize_whitespace(str(paper.get("status") or "")) for paper in papers)
+    status_labels = {"to-read": "待读", "reading": "在读", "reviewing": "复读", "completed": "已读"}
+
+    for label, theme_papers in sorted_themes:
+        concept_counter = Counter()
+        for paper in theme_papers:
+            concept_counter.update(parse_string_list(paper.get("tags")))
+            concept_counter.update(parse_string_list(paper.get("aiKeywords")))
+        concepts = [item for item, _ in concept_counter.most_common() if item != label][:5]
+        ranked_papers = sorted(
+            theme_papers,
+            key=lambda item: (-(normalize_number(item.get("rating"), 0) + (1 if item.get("favorite") else 0)), item.get("title", "")),
+        )
+        themes.append(
+            {
+                "id": label,
+                "label": label,
+                "summaryZh": f"该主题包含 {len(theme_papers)} 篇论文，重点围绕 {', '.join(concepts[:3]) or '核心基础问题'} 展开。",
+                "concepts": concepts,
+                "paperIds": [paper["id"] for paper in ranked_papers],
+            }
+        )
+
+    top_theme_label, top_theme_papers = sorted_themes[0]
+    summary = (
+        f"当前论文库共有 {len(papers)} 篇论文，已经自动整理为 {len(themes)} 个主题。"
+        f"最集中的主题是“{top_theme_label}”，包含 {len(top_theme_papers)} 篇论文。"
+    )
+    dominant_status = all_status.most_common(1)[0][0] if all_status else "to-read"
+    insights = [
+        f"高频标签主要是：{', '.join([item for item, _ in all_tags.most_common(4)]) or '暂无明显高频标签'}。",
+        f"当前数量最多的阅读状态是“{status_labels.get(dominant_status, dominant_status)}”。",
+        f"收藏论文共 {sum(1 for paper in papers if paper.get('favorite'))} 篇，可作为知识主干的优先节点。",
+    ]
+    return build_library_map_payload(
+        papers,
+        themes,
+        source="local",
+        summary_zh=summary,
+        insights_zh=insights,
+        ai_model="",
+        theme_relations=local_theme_relations(themes),
+        message=message,
+    )
+
+
+def call_ai_library_map(papers: list[dict]) -> dict:
+    schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "summary_zh": {"type": "string"},
+            "insights_zh": {"type": "array", "items": {"type": "string"}, "maxItems": 6},
+            "themes": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "id": {"type": "string"},
+                        "label": {"type": "string"},
+                        "summary_zh": {"type": "string"},
+                        "paper_ids": {"type": "array", "items": {"type": "string"}, "maxItems": 24},
+                        "concepts": {"type": "array", "items": {"type": "string"}, "maxItems": 8},
+                    },
+                    "required": ["id", "label", "summary_zh", "paper_ids", "concepts"],
+                },
+            },
+            "theme_relations": {
+                "type": "array",
+                "maxItems": 16,
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "source_theme_id": {"type": "string"},
+                        "target_theme_id": {"type": "string"},
+                        "label": {"type": "string"},
+                    },
+                    "required": ["source_theme_id", "target_theme_id", "label"],
+                },
+            },
+        },
+        "required": ["summary_zh", "insights_zh", "themes", "theme_relations"],
+    }
+
+    compact_papers = [
+        {
+            "id": paper.get("id", ""),
+            "title": paper.get("title", ""),
+            "title_zh": paper.get("titleZh", ""),
+            "year": paper.get("year", 0),
+            "venue": paper.get("venue", ""),
+            "status": paper.get("status", ""),
+            "priority": paper.get("priority", ""),
+            "favorite": bool(paper.get("favorite")),
+            "collection": paper.get("collection", ""),
+            "category": paper.get("category", ""),
+            "tags": parse_string_list(paper.get("tags"))[:6],
+            "ai_keywords": parse_string_list(paper.get("aiKeywords"))[:6],
+            "summary": normalize_multiline_text(str(paper.get("aiSummaryZh") or paper.get("aiSummary") or paper.get("abstract") or ""), limit=280),
+        }
+        for paper in papers[:60]
+    ]
+
+    system_prompt = (
+        "You are building a Chinese knowledge map for an academic paper library. "
+        "Cluster the papers into practical themes, identify the key concepts under each theme, "
+        "and infer how the themes relate to each other. "
+        "All natural language fields must be polished Simplified Chinese. "
+        "Use the provided paper ids exactly. "
+        "Themes must be coherent, compact, and useful for a researcher reviewing the whole library."
+    )
+    user_prompt = (
+        "请基于以下论文库数据，为整个库生成中文知识地图。"
+        "输出需要同时服务于思维导图和知识图谱视图。"
+        "themes 是主题分组，每个主题要挂上相关 paper_ids；"
+        "theme_relations 只描述主题之间的关系，如方法演进、共同基础、应用依赖、互补方向。"
+        f"\n论文库数据：\n{json.dumps(compact_papers, ensure_ascii=False)}"
+    )
+    return call_ai_json(system_prompt, user_prompt, schema, timeout=90)
+
+
+def normalize_ai_library_map(papers: list[dict], payload: dict, fallback_payload: dict) -> dict:
+    if not isinstance(payload, dict):
+        return fallback_payload
+
+    paper_lookup = {paper["id"]: paper for paper in papers}
+    raw_themes = payload.get("themes")
+    if not isinstance(raw_themes, list):
+        return fallback_payload
+
+    themes: list[dict] = []
+    assigned: set[str] = set()
+    for item in raw_themes:
+        if not isinstance(item, dict):
+            continue
+        label = normalize_whitespace(str(item.get("label") or ""))
+        theme_id = normalize_whitespace(str(item.get("id") or label or ""))
+        if not label or not theme_id:
+            continue
+        paper_ids = []
+        for paper_id in item.get("paper_ids", []):
+            if not isinstance(paper_id, str):
+                continue
+            normalized_id = normalize_whitespace(paper_id)
+            if normalized_id in paper_lookup and normalized_id not in paper_ids:
+                paper_ids.append(normalized_id)
+        if not paper_ids:
+            continue
+        assigned.update(paper_ids)
+        themes.append(
+            {
+                "id": theme_id,
+                "label": label,
+                "summaryZh": normalize_multiline_text(str(item.get("summary_zh") or ""), limit=420) or f"{label} 主题论文集合",
+                "concepts": parse_string_list(item.get("concepts"))[:6],
+                "paperIds": paper_ids,
+            }
+        )
+
+    if not themes:
+        return fallback_payload
+
+    unassigned = [paper["id"] for paper in papers if paper["id"] not in assigned]
+    if unassigned:
+        themes.append(
+            {
+                "id": "remaining",
+                "label": "补充主题",
+                "summaryZh": "这些论文在当前主题划分中作为补充线索保留。",
+                "concepts": [],
+                "paperIds": unassigned,
+            }
+        )
+
+    theme_relations = []
+    raw_relations = payload.get("theme_relations")
+    if isinstance(raw_relations, list):
+        for item in raw_relations:
+            if not isinstance(item, dict):
+                continue
+            source_theme_id = normalize_whitespace(str(item.get("source_theme_id") or ""))
+            target_theme_id = normalize_whitespace(str(item.get("target_theme_id") or ""))
+            label = normalize_whitespace(str(item.get("label") or ""))
+            if source_theme_id and target_theme_id and label and source_theme_id != target_theme_id:
+                theme_relations.append(
+                    {
+                        "sourceThemeId": source_theme_id,
+                        "targetThemeId": target_theme_id,
+                        "label": label,
+                    }
+                )
+
+    return build_library_map_payload(
+        papers,
+        themes,
+        source="ai",
+        summary_zh=normalize_multiline_text(str(payload.get("summary_zh") or fallback_payload.get("summaryZh") or ""), limit=1200),
+        insights_zh=parse_string_list(payload.get("insights_zh")) or fallback_payload.get("insightsZh", []),
+        ai_model=current_ai_model(),
+        theme_relations=theme_relations,
+        message="",
+    )
+
+
+def related_papers_for_focus(paper_id: str, limit: int = 16) -> tuple[list[dict], dict]:
+    all_papers = list_papers()
+    focus_paper = next((paper for paper in all_papers if paper["id"] == paper_id), None)
+    if not focus_paper:
+        raise FileNotFoundError("paper not found")
+
+    focus_tags = set(parse_string_list(focus_paper.get("tags")))
+    focus_keywords = set(parse_string_list(focus_paper.get("aiKeywords")))
+    focus_collection = normalize_whitespace(str(focus_paper.get("collection") or ""))
+    focus_category = normalize_whitespace(str(focus_paper.get("category") or ""))
+
+    scored: list[tuple[int, dict]] = []
+    for paper in all_papers:
+        if paper["id"] == paper_id:
+            continue
+        score = 0
+        collection = normalize_whitespace(str(paper.get("collection") or ""))
+        category = normalize_whitespace(str(paper.get("category") or ""))
+        tags = set(parse_string_list(paper.get("tags")))
+        keywords = set(parse_string_list(paper.get("aiKeywords")))
+        if focus_collection and collection and collection == focus_collection:
+            score += 5
+        if focus_category and category and category == focus_category:
+            score += 4
+        score += len(focus_tags & tags) * 3
+        score += len(focus_keywords & keywords) * 2
+        if score > 0:
+            score += normalize_number(paper.get("rating"), 0)
+            if paper.get("favorite"):
+                score += 2
+            scored.append((score, paper))
+
+    scored.sort(key=lambda item: (-item[0], item[1].get("title", "")))
+    related = [focus_paper] + [paper for _, paper in scored[: max(0, limit - 1)]]
+    scope_info = {
+        "mode": "paper",
+        "paperId": focus_paper["id"],
+        "label": paper_display_title(focus_paper),
+        "paperTitle": paper_display_title(focus_paper),
+    }
+    return related, scope_info
+
+
+def resolve_library_map_scope(paper_id: str = "") -> tuple[list[dict], dict, str]:
+    normalized_paper_id = normalize_whitespace(paper_id)
+    if normalized_paper_id:
+        papers, scope = related_papers_for_focus(normalized_paper_id)
+        return papers, scope, f"paper_map_{normalized_paper_id}"
+
+    return (
+        list_papers(),
+        {"mode": "library", "paperId": "", "label": "整个论文库", "paperTitle": ""},
+        "library_map",
+    )
+
+
+def get_library_map(refresh: bool = False, paper_id: str = "") -> dict:
+    papers, scope, cache_key = resolve_library_map_scope(paper_id)
+    fingerprint = hashlib.sha1(f"{scope['mode']}:{scope.get('paperId', '')}:{library_map_fingerprint(papers)}".encode("utf-8")).hexdigest()
+    if not refresh:
+        cached = load_library_map_cache(cache_key)
+        if cached and cached.get("fingerprint") == fingerprint:
+            return cached
+
+    fallback = build_local_library_map(papers)
+    payload = fallback
+    if ai_enabled() and papers:
+        try:
+            payload = normalize_ai_library_map(papers, call_ai_library_map(papers), fallback)
+        except Exception as exc:
+            payload = build_local_library_map(papers, message=f"AI 生成失败，已回退为本地规则图谱：{exc}")
+
+    if scope["mode"] == "paper":
+        payload["summaryZh"] = (
+            f"当前图谱以《{scope['paperTitle']}》为中心，自动串联与它主题最接近的论文、概念和研究脉络。"
+            + (f" {payload.get('summaryZh', '')}" if payload.get("summaryZh") else "")
+        ).strip()
+
+    payload["scope"] = scope
+    payload["fingerprint"] = fingerprint
+    save_library_map_cache(payload, cache_key)
+    return payload
+
+
 def import_pdf(file_item) -> dict:
     original_name = safe_filename(file_item.filename or "paper.pdf")
     paper_id = str(uuid.uuid4())
@@ -2610,6 +3919,7 @@ class PaperHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
+        library_map_match = parsed.path == "/api/library-map"
         reader_match = re.fullmatch(r"/api/papers/([^/]+)/reader", parsed.path)
         translation_match = re.fullmatch(r"/api/papers/([^/]+)/reader-translation", parsed.path)
         translations_match = re.fullmatch(r"/api/papers/([^/]+)/reader-translations", parsed.path)
@@ -2623,6 +3933,13 @@ class PaperHandler(SimpleHTTPRequestHandler):
             return
         if parsed.path == "/api/papers":
             self.end_json(list_papers())
+            return
+        if library_map_match:
+            paper_id = normalize_whitespace(parse_qs(parsed.query).get("paperId", [""])[0])
+            try:
+                self.end_json(get_library_map(paper_id=paper_id))
+            except FileNotFoundError as exc:
+                self.end_api_error(HTTPStatus.NOT_FOUND, str(exc))
             return
         if reader_match:
             paper_id = reader_match.group(1)
@@ -2685,11 +4002,41 @@ class PaperHandler(SimpleHTTPRequestHandler):
         preload_translation_match = re.fullmatch(r"/api/papers/([^/]+)/reader-translation/preload", parsed.path)
         translation_job_match = re.fullmatch(r"/api/papers/([^/]+)/reader-translation-job", parsed.path)
         digest_match = re.fullmatch(r"/api/papers/([^/]+)/digest", parsed.path)
+        library_map_match = parsed.path == "/api/library-map"
+        topic_discovery_match = parsed.path == "/api/topic-discovery"
         if parsed.path == "/api/papers":
             payload = normalize_paper_payload(self.read_json())
             with connect_db() as conn:
                 insert_paper(conn, payload)
             self.end_json(get_paper(payload["id"]), HTTPStatus.CREATED)
+            return
+
+        if topic_discovery_match:
+            payload = self.read_json()
+            topic = normalize_whitespace(str(payload.get("topic") or ""))
+            limit = normalize_number(payload.get("limit"), BULK_DISCOVERY_DEFAULT_LIMIT)
+            auto_download_count = normalize_number(payload.get("autoDownloadCount"), 5)
+            if not topic:
+                self.end_api_error(HTTPStatus.BAD_REQUEST, "missing topic")
+                return
+            try:
+                self.end_json(
+                    discover_and_import_topic(topic, limit=limit or BULK_DISCOVERY_DEFAULT_LIMIT, auto_download_count=auto_download_count),
+                    HTTPStatus.CREATED,
+                )
+            except ValueError as exc:
+                self.end_api_error(HTTPStatus.BAD_REQUEST, str(exc))
+            except RuntimeError as exc:
+                self.end_api_error(HTTPStatus.BAD_GATEWAY, str(exc))
+            return
+
+        if library_map_match:
+            payload = self.read_json()
+            paper_id = normalize_whitespace(str(payload.get("paperId") or parse_qs(parsed.query).get("paperId", [""])[0]))
+            try:
+                self.end_json(get_library_map(refresh=True, paper_id=paper_id))
+            except FileNotFoundError as exc:
+                self.end_api_error(HTTPStatus.NOT_FOUND, str(exc))
             return
 
         if parsed.path == "/api/papers/import-pdf":

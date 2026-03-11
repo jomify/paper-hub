@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.pyc
+
+paper_hub.db
+storage/pdfs/
+storage/covers/
+storage/renders/
+storage/translations/
+storage/digests/
+storage/maps/
+
+provider_config.local.json
