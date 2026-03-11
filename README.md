@@ -271,15 +271,6 @@ python server.py
 - 配置 AI Provider
 - 或者直接使用英文研究主题
 
-## Public Release Checklist
-
-如果你要把这个项目公开发布到 GitHub，请先确认：
-
-- `.env` 不包含真实密钥
-- `provider_config.json` 不包含真实密钥
-- 没有提交本地数据库
-- 没有提交个人 PDF、渲染图、翻译缓存和 Digest 缓存
-- `.gitignore` 已忽略运行时文件
 
 ## Roadmap Ideas
 
