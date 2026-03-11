@@ -1,0 +1,75 @@
+{
+  "selectedProvider": "openai",
+  "providers": {
+    "openai": {
+      "model": "gpt-5-mini",
+      "apiUrl": "https://api.vectorengine.ai",
+      "apiKey": "sk-R83XSNJc9ojknUKWp2FcnrVIM1GUme0DoHOQnYhE44ncm6Wn"
+    },
+    "anthropic": {
+      "model": "claude-3-5-sonnet-latest",
+      "apiUrl": "https://api.anthropic.com/v1/messages",
+      "apiKey": ""
+    },
+    "gemini": {
+      "model": "gemini-2.0-flash",
+      "apiUrl": "https://generativelanguage.googleapis.com/v1beta/models",
+      "apiKey": ""
+    },
+    "relay-openai": {
+      "model": "",
+      "apiUrl": "https://your-relay.example/v1/chat/completions",
+      "apiKey": ""
+    },
+    "openrouter": {
+      "model": "openai/gpt-4.1-mini",
+      "apiUrl": "https://openrouter.ai/api/v1/chat/completions",
+      "apiKey": ""
+    },
+    "groq": {
+      "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "apiUrl": "https://api.groq.com/openai/v1/chat/completions",
+      "apiKey": ""
+    },
+    "glm": {
+      "model": "glm-5",
+      "apiUrl": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+      "apiKey": ""
+    },
+    "qwen": {
+      "model": "qwen-vl-max",
+      "apiUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+      "apiKey": "sk-e871f16603744d08a4ce9e905664ef69"
+    },
+    "together": {
+      "model": "meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+      "apiUrl": "https://api.together.xyz/v1/chat/completions",
+      "apiKey": ""
+    },
+    "xai": {
+      "model": "grok-2-vision-latest",
+      "apiUrl": "https://api.x.ai/v1/chat/completions",
+      "apiKey": ""
+    },
+    "deepseek": {
+      "model": "deepseek-chat",
+      "apiUrl": "https://api.deepseek.com/chat/completions",
+      "apiKey": ""
+    },
+    "azure-openai": {
+      "model": "gpt-4.1-mini",
+      "apiUrl": "",
+      "apiKey": ""
+    },
+    "ollama": {
+      "model": "qwen2.5vl:7b",
+      "apiUrl": "http://127.0.0.1:11434/v1/chat/completions",
+      "apiKey": ""
+    },
+    "lmstudio": {
+      "model": "qwen2.5-vl-7b-instruct",
+      "apiUrl": "http://127.0.0.1:1234/v1/chat/completions",
+      "apiKey": ""
+    }
+  }
+}

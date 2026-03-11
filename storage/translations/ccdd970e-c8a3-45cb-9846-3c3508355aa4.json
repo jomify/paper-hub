@@ -1,0 +1,1833 @@
+{
+  "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+  "pages": {
+    "1": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 1,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 51.19,
+          "y": 77.15,
+          "width": 492.27,
+          "height": 37.14,
+          "fontSize": 17.22,
+          "text": "CharacterGen：基于单图像的多视角姿态标准化高效3D角色生成"
+        },
+        {
+          "x": 51.46,
+          "y": 120.76,
+          "width": 452.65,
+          "height": 67.75,
+          "fontSize": 11.96,
+          "text": "HAO-YANG PENG，BNRist，清华大学计算机科学与技术系，中国 JIA-PENG ZHANG，清华大学至理书院，中国 MENG-HAO GUO，BNRist，清华大学计算机科学与技术系，中国 YAN-PEI CAO，VAST，中国 SHI-MIN HU，BNRist，清华大学计算机科学与技术系，中国"
+        },
+        {
+          "x": 69.76,
+          "y": 219.97,
+          "width": 46.77,
+          "height": 21.01,
+          "fontSize": 8.02,
+          "text": "单张输入图像"
+        },
+        {
+          "x": 124.86,
+          "y": 220.6,
+          "width": 52.12,
+          "height": 11.35,
+          "fontSize": 8.02,
+          "text": "2D 多视图图像"
+        },
+        {
+          "x": 137.23,
+          "y": 224.28,
+          "width": 95.46,
+          "height": 17.33,
+          "fontSize": 8.02,
+          "text": "3D 角色"
+        },
+        {
+          "x": 231.12,
+          "y": 221.73,
+          "width": 46.77,
+          "height": 21.01,
+          "fontSize": 8.02,
+          "text": "单张输入图像"
+        },
+        {
+          "x": 285.31,
+          "y": 220.6,
+          "width": 52.12,
+          "height": 11.35,
+          "fontSize": 8.02,
+          "text": "2D 多视图图像"
+        },
+        {
+          "x": 297.69,
+          "y": 224.79,
+          "width": 97.77,
+          "height": 16.82,
+          "fontSize": 8.02,
+          "text": "3D 角色"
+        },
+        {
+          "x": 51.81,
+          "y": 469.93,
+          "width": 508.38,
+          "height": 17.93,
+          "fontSize": 8.05,
+          "text": "图1. CharacterGen 是一个高效的3D角色生成框架。它以单张输入图像为起点，生成在标准姿态下、外观一致的高质量3D角色网格，适用于下游的绑定和动画工作流程。© kinoko7"
+        },
+        {
+          "x": 51.61,
+          "y": 497.02,
+          "width": 243.78,
+          "height": 47.87,
+          "fontSize": 8.04,
+          "text": "在数字内容创作领域，从单张图像生成高质量3D角色极具挑战性，尤其面对各种身体姿态的复杂性以及自遮挡和姿态歧义问题。本文提出了 CharacterGen，一个为高效生成3D角色而开发的框架。CharacterGen 引入了一个精简的生成流程。"
+        },
+        {
+          "x": 51.69,
+          "y": 555.51,
+          "width": 243.12,
+          "height": 62.73,
+          "fontSize": 8.0,
+          "text": "作者联系方式：Hao-Yang Peng，phy22@mails.tsinghua.edu.cn，BNRist，清华大学计算机科学与技术系，北京，中国；Jia-Peng Zhang，zhangjp20@mails.tsinghua.edu.cn，清华大学至理书院，北京，中国；Meng-Hao Guo，gmh20@mails.tsinghua.edu.cn，BNRist，清华大学计算机科学与技术系，北京，中国；Yan-Pei Cao，caoyanpei@gmail.com，VAST，北京，中国；Shi-Min Hu，shimin@tsinghua.edu.cn，BNRist，清华大学计算机科学与技术系，北京，中国。"
+        },
+        {
+          "x": 51.33,
+          "y": 682.75,
+          "width": 133.42,
+          "height": 22.92,
+          "fontSize": 8.0,
+          "text": "© 2024 版权归作者/版权所有者所有。ACM 1557-7368/2024/7-ART84 https://doi.org/10.1145/3658217"
+        },
+        {
+          "x": 317.68,
+          "y": 497.11,
+          "width": 243.86,
+          "height": 127.49,
+          "fontSize": 8.05,
+          "text": "生成流程，并引入了基于图像条件的多视角扩散模型。该模型能有效将输入姿态标定为标准姿态，同时保留输入图像的重要特征，从而解决不同姿态带来的问题。我们方法的另一个核心组件是基于 Transformer 的、具有通用性的稀疏视图重建模型，可从多视角图像构建细致的3D模型。我们还采用了纹理反投影（texture-back-projection）策略以生成高质量的纹理贴图。此外，我们整理并制作了一个动漫角色数据集，包含多姿态和多视角渲染，用于训练和评估模型。通过定量和定性实验，我们的方法在生成具有高质量形状和纹理的3D角色方面表现出色，生成结果可直接用于下游的绑定和动画等应用。"
+        },
+        {
+          "x": 317.95,
+          "y": 640.49,
+          "width": 242.81,
+          "height": 18.51,
+          "fontSize": 8.0,
+          "text": "CCS 概念：• 计算方法学 → 人工智能；形状建模；图像处理。"
+        },
+        {
+          "x": 317.68,
+          "y": 675.4,
+          "width": 242.66,
+          "height": 18.0,
+          "fontSize": 8.05,
+          "text": "其他关键词与短语：基于图像的生成、3D 头像生成、头像姿态标准化"
+        },
+        {
+          "x": 351.5,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., 第43卷，第4期，文章84。出版日期：2024年7月。"
+        },
+        {
+          "x": 52.56,
+          "y": 664.99,
+          "width": 233.5,
+          "height": 17.77,
+          "fontSize": 8.0,
+          "text": "本作品采用知识共享署名-非商业性使用-禁止演绎4.0国际许可协议（CC BY-NC-ND 4.0）授权。"
+        }
+      ],
+      "translatedAt": "2026-03-11T18:57:13",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "5": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 5,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 219.05,
+          "y": 55.89,
+          "width": 341.14,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "CharacterGen: 基于单图像的多视角姿态标准化高效3D角色生成 • 84:5"
+        },
+        {
+          "x": 51.51,
+          "y": 82.01,
+          "width": 244.05,
+          "height": 129.44,
+          "fontSize": 9.06,
+          "text": "IDUNet 与 multi-view UNet 相同。IDUNet 接受固定的文本提示 \"best quality\" 以在生成过程中提供通用引导。不同于 ControlNet，为了确保在去噪图像与条件图像的所有 patch 之间实现局部的 patch 级交互，我们利用潜在 token 与条件图像 token 之间的 cross-attention，而不是简单地将它们相加。注意 IDUNet 用于向 multi-view UNet 提供像素级特征，向输入条件图像加入噪声会严重削弱 3D 角色的纹理细节。相反，传统的去噪 UNet 是对带噪图像根据时间步预测噪声。因此，我们直接采用 VAE 来编码无噪声的输入图像。"
+        },
+        {
+          "x": 51.58,
+          "y": 219.77,
+          "width": 243.98,
+          "height": 195.45,
+          "fontSize": 9.06,
+          "text": "3.2.2 Multi-view UNet。multi-view UNet 的目标是从单张带姿态输入图像生成外观高度一致的多视角 A-pose 图像。在 multi-view UNet 中，我们对四视图的带噪潜变量 x_4v ∈ R^{B×4×N×D} 同时执行去噪过程。这里 B、N 和 D 分别表示潜变量批量大小、token 数量和 token 特征维度。multi-view UNet 将四个视图的外参相机矩阵作为空间引导。在推理阶段，相机姿态设置为固定方位角 {0°, 90°, 180°, 270°}，俯仰角为 0°。我们 multi-view UNet 中的 transformer block 由空间自注意力模块和跨注意力模块组成。与 MVDream [Shi et al. 2023b] 中类似，空间自注意力模块直接接受所有四个带噪潜变量 x_4v 的 token 及对应的相机视图嵌入。在空间自注意力层中，x_4v 被重塑为 (B, 4N, D) 以用于 patch 级的跨视图交互。该设计允许去噪 UNet 捕捉不同视图之间的全局关系，确保生成图像具有高一致性。"
+        },
+        {
+          "x": 51.81,
+          "y": 417.24,
+          "width": 242.24,
+          "height": 63.73,
+          "fontSize": 9.06,
+          "text": "在随后的每个 cross-attention 模块中，来自 IDUNet 的条件特征 f_ID 与 CLIP 编码的图像特征 f_CLIP 级联以生成最终的条件特征 f_Cond。然后使用 cross-attention 层将 patch 级交互引入 x_4v。整个过程如式 (1)-(2) 所示，并在图 3（右上）中示意。"
+        },
+        {
+          "x": 116.44,
+          "y": 486.41,
+          "width": 178.14,
+          "height": 12.42,
+          "fontSize": 8.97,
+          "text": "f_Cond = concat(f_ID, f_CLIP) (1)"
+        },
+        {
+          "x": 123.58,
+          "y": 500.28,
+          "width": 171.0,
+          "height": 12.39,
+          "fontSize": 8.97,
+          "text": "x_4v = Cross_Attn(x_4v, f_Cond) (2)"
+        },
+        {
+          "x": 51.81,
+          "y": 518.8,
+          "width": 243.75,
+          "height": 97.26,
+          "fontSize": 9.06,
+          "text": "早期工作 [Lin et al. 2023b] 关于扩散过程表明，在训练时对最后时间步 T 应用零样本信噪比（zero SNR）可以提升最终生成质量，因为推理阶段的输入噪声是纯高斯噪声。为了在训练阶段实现零 SNR，我们人为将 SNR_T 设为零，并线性缩放其他 Gaussian 分布参数 β_s。我们设置 UNet 直接输出多视图带噪潜变量的速度 v_pred ∈ R^{(B,4,N,D)} 并将其转换为噪声 ε_pred。最终的优化目标如式 (3) 所示。"
+        },
+        {
+          "x": 134.29,
+          "y": 617.58,
+          "width": 160.29,
+          "height": 13.78,
+          "fontSize": 8.97,
+          "text": "L_{4v} = || ε_{4v} − ε_{pred} ||_2^2 . (3)"
+        },
+        {
+          "x": 51.47,
+          "y": 632.5,
+          "width": 242.57,
+          "height": 21.94,
+          "fontSize": 8.97,
+          "text": "其中 ε_{4v} 是在扩散正向传播中加入到多视图 A-pose 图像上的噪声。"
+        },
+        {
+          "x": 51.58,
+          "y": 662.69,
+          "width": 243.98,
+          "height": 30.93,
+          "fontSize": 9.06,
+          "text": "3.2.3 姿态标准化。结合 IDUNet，我们的多视图扩散模型能够成功生成高度一致的正交视图图像，同时保留提示图像中的细节特征。为了使扩散模型在生成过程中实现角色姿态标准化，我们将两种 UNet 与来自 Anime3D 数据集的图像对联合训练。"
+        },
+        {
+          "x": 317.95,
+          "y": 81.98,
+          "width": 243.76,
+          "height": 162.35,
+          "fontSize": 9.06,
+          "text": "但仅仅在没有额外姿态约束的情况下训练扩散网络会导致角色布局错位和出现不相关的身体部位。为了解决这些问题，我们向扩散模型引入角色布局以生成 A-pose 角色图像，采用 OpenPose [Cao et al. 2021] 预测姿态嵌入作为附加条件。生成的嵌入被直接添加到潜在噪声中，帮助扩散模型学习角色关节与生成角色布局之间的关系。由于角色具有各种体型，我们利用来自 Anime3D 数据集的三组不同的 OpenPose 图并在推理阶段选择 CLIP 得分最高的一组作为输入的姿态条件。"
+        },
+        {
+          "x": 317.95,
+          "y": 256.54,
+          "width": 125.35,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "3.3 3D 角色生成"
+        },
+        {
+          "x": 317.52,
+          "y": 271.55,
+          "width": 244.19,
+          "height": 107.52,
+          "fontSize": 9.06,
+          "text": "下面我们描述如何从多视图姿态标准化扩散模型生成的四视图图像高效地生成 3D 角色。如图 4 所示，我们采用粗到细的流程来完成 3D 角色生成任务。我们首先采用两阶段的基于 transformer 的网络来重建角色的几何与粗糙外观，沿用了 LRM [Hong et al. 2023b] 的设计。随后我们采用纹理反投影策略，使用生成的高分辨率四视图图像快速提升纹理质量。最后，我们使用 Poisson Blending [Pérez et al. 2003] 减少纹理贴图上的缝隙。"
+        },
+        {
+          "x": 317.62,
+          "y": 388.72,
+          "width": 244.09,
+          "height": 118.62,
+          "fontSize": 9.06,
+          "text": "3.3.1 带粗糙纹理的角色重建。受 LRM [Hong et al. 2023b] 启发，我们采用深度 transformer 网络来高效地从 multi-view 扩散模型生成的四视图图像重建角色。LRM 在训练时使用 Objaverse 数据集 [Deitke et al. 2023] 以支持通用的 3D 物体生成，但其对人类角色布局的复杂性捕捉不足。为保持重建网络既能处理通用 3D 物体又能处理风格化角色的能力，我们首先在 Objaverse 数据集上对 transformer 网络进行预训练，然后用我们的 Anime3D 数据集对模型进行微调，以引入更多人体结构先验。"
+        },
+        {
+          "x": 317.62,
+          "y": 509.27,
+          "width": 244.09,
+          "height": 129.58,
+          "fontSize": 9.06,
+          "text": "原始 LRM 建议主要以 NeRF [Mildenhall et al. 2022] 表示进行训练。然而，直接从 NeRF 模型提取几何常常会产生嘈杂的表面几何，这会给后续在下游图形管线中使用角色网格带来问题。相反，我们对重建网络采用两阶段微调策略。第一阶段使用类似 LRM 的 triplane NeRF 表示以确定角色的粗略几何与外观。在第二阶段，我们修改重建网络的解码器模块，使其预测有符号距离函数（SDF）而非密度场，这使 CharacterGen 能获得更平滑且更精确的表面几何。"
+        },
+        {
+          "x": 317.95,
+          "y": 640.91,
+          "width": 243.76,
+          "height": 52.71,
+          "fontSize": 9.06,
+          "text": "除了 MSE 损失外，我们还引入了 mask 损失和 LPIPS 损失 [Zhang et al. 2018] 来监督重建外观。我们采用基于真实 alpha mask 与渲染 alpha mask 之间的二元交叉熵损失作为 mask 损失，以帮助重建模型区分输入四视图中的空白区域。"
+        },
+        {
+          "x": 351.5,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., Vol. 43, No. 4, Article 84. 出版日期: 2024 年 7 月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:16:03",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "3": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 3,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 219.05,
+          "y": 55.89,
+          "width": 341.14,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "CharacterGen: Efficient 3D Character Generation from Single Images with Multi-View Pose Canonicalization • 84:3"
+        },
+        {
+          "x": 51.81,
+          "y": 81.87,
+          "width": 243.62,
+          "height": 41.91,
+          "fontSize": 9.06,
+          "text": "基于 transformer 的重建模型 [Hong et al. 2023b; Li et al. 2023] 被用于高效的 3D 角色生成。篇幅所限，无法讨论 3D 人体重建工作的相关内容 [Cha et al. 2023; Saito et al. 2019, 2020; Xiu et al. 2023, 2022]。"
+        },
+        {
+          "x": 51.81,
+          "y": 143.71,
+          "width": 180.0,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "2.1 基于扩散的 3D 物体生成"
+        },
+        {
+          "x": 51.47,
+          "y": 158.58,
+          "width": 244.09,
+          "height": 261.09,
+          "fontSize": 9.06,
+          "text": "近年来，扩散方法在 3D 物体生成任务中展示了强大的引导能力。开创性工作 DreamFusion [Poole et al. 2023] 和 SJC [Wang et al. 2023a] 利用 score distillation sampling (SDS) 从预训练的 2D 扩散模型提供梯度引导用于文本到 3D 的生成任务。Magic3D [Lin et al. 2023a] 和 Fantasia3D [Chen et al. 2023a] 在细化阶段采用隐式四面体场以支持高分辨率渲染。ProlificDreamer [Wang et al. 2023b] 提出 VSD，从 LoRA 网络中蒸馏梯度分数以更好地学习 3D 物体的分布。Zero123 [Liu et al. 2023c] 提出一种新颖的扩散模型，用于生成在给定相机位姿下与输入图像相一致的多视图图像。Magic123 [Qian et al. 2023] 结合 SDS 与 Zero123 引导来从图像提示生成 3D 物体，并采用重建损失以提升正视纹理质量。MVDream [Shi et al. 2023b] 和 ImageDream [Wang and Shi 2023] 利用多视图扩散模型在 3D 物体生成过程中提供高度一致的引导。SyncDreamer [Liu et al. 2023a] 使用 3D 感知的注意力模块来实现同步的多视图图像生成。其他多项工作 [Erkoç et al. 2023; Hui et al. 2022; Jun and Nichol 2023; Müller et al. 2023; Nichol et al. 2022; Zeng et al. 2022; Zhang et al. 2023b] 使用 3D 数据训练扩散模型以直接生成 3D 物体，这类方法速度快，但在输出多样性方面存在挑战。"
+        },
+        {
+          "x": 51.81,
+          "y": 439.6,
+          "width": 111.03,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "2.2 3D 头像（Avatar）生成"
+        },
+        {
+          "x": 51.49,
+          "y": 454.53,
+          "width": 244.07,
+          "height": 239.1,
+          "fontSize": 9.06,
+          "text": "使用强的人体先验如 SMPL [Loper et al. 2015] 和 SMPL-X [Pavlakos et al. 2019]，可以基于通用的 3D 生成方法生成高质量的人类化身。EVA3D [Hong et al. 2023a] 将 GAN 主干与基于姿态的采样方法结合，用于生成高质量的 3D 人类化身。AvatarCLIP [Hong et al. 2022] 首次通过利用预训练的 CLIP 模型来指导几何与颜色网络的优化，解决了文本到人类生成的问题。Dreamavatar [Cao et al. 2023] 和 AvatarCraft [Jiang et al. 2023] 利用 SMPL 初始化在扩散引导生成过程中使用的隐式人体几何。DreamHuman [Kolotouros et al. 2023] 采用 ImGHum [Alldieck et al. 2021] 作为人体先验，并提出聚焦渲染机制以更好地重建化身的细节几何。DreamWaltz [Huang et al. 2023a] 使用 ControlNet [Zhang and Agrawala 2023] 为微调动画表示提供姿态引导。AvatarVerse [Zhang et al. 2023a] 和 AvatarStudio [Zhang et al. 2023c] 在生成过程中都使用 DensePose 引导的 ControlNet，以规避多脸“Janus”问题并支持局部几何优化。TeCH [Huang et al. 2023b] 通过在输入图像上训练额外的 DreamBooth 模型 [Ruiz et al. 2023] 来支持基于图像提示的化身生成，用于 SDS 引导模型。TADA [Liao"
+        },
+        {
+          "x": 317.95,
+          "y": 243.76,
+          "width": 243.58,
+          "height": 27.9,
+          "fontSize": 8.0,
+          "text": "Fig. 2. An example character from our Anime3D dataset from four different camera views, demonstrates how we organize the image pairs during training to extend UNet’s ability to determine a canonical pose."
+        },
+        {
+          "x": 317.95,
+          "y": 295.11,
+          "width": 242.42,
+          "height": 74.79,
+          "fontSize": 9.06,
+          "text": "et al. 2023] 直接将 2D 扩散模型蒸馏用于优化 SMPL 体网格的法线和位移。大多数这些方法主要关注文本到 3D 的角色生成，无法利用图像提示，而图像提示对于可控的角色生成是必要的。基于 DreamBooth 的方法由于在单张输入图像上过拟合而产生强烈的正视图偏差，严重受限于“Janus”问题。"
+        },
+        {
+          "x": 317.95,
+          "y": 380.85,
+          "width": 55.86,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "3 方法"
+        },
+        {
+          "x": 317.52,
+          "y": 395.86,
+          "width": 244.19,
+          "height": 85.61,
+          "fontSize": 9.05,
+          "text": "我们现在介绍 CharacterGen 的整体框架，目标是从任意姿态的 2D 图像高效生成 A 姿势的 3D 角色。第 3.1 节首先介绍我们的 Anime3D 数据集，说明我们如何组织数据以辅助扩散模型进行 3D 空间理解和角色姿态标准化。第 3.2 节接着解释 CharacterGen 如何生成高度一致的多视角姿态标准化角色图像。最后，第 3.3 节展示我们的高效 3D 重建流水线。"
+        },
+        {
+          "x": 317.95,
+          "y": 492.42,
+          "width": 94.29,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "3.1 Anime3D 数据集"
+        },
+        {
+          "x": 317.64,
+          "y": 507.42,
+          "width": 244.07,
+          "height": 30.83,
+          "fontSize": 9.05,
+          "text": "为了进一步提升扩散模型对 3D 角色的理解能力并减轻“Janus”问题，我们准备了包含 13,746 个风格化角色主体的 Anime3D 数据集。"
+        },
+        {
+          "x": 317.75,
+          "y": 546.66,
+          "width": 243.96,
+          "height": 74.76,
+          "fontSize": 9.06,
+          "text": "3.1.1 数据采集。现有的大型 3D 物体数据集如 Objaverse [Deitke et al. 2023] 或 OmniObject3D [Wu et al. 2023b] 不包含足够的风格化 3D 角色以满足我们的训练需求。受 PAniC3D [Chen et al. 2023b] 启发，我们首先从 VRoid Hub [VRoid 2022] 收集了近 14,500 个二次元（anime）角色模型，然后删除了非类人数据，最终保留了 13,746 个角色模型。"
+        },
+        {
+          "x": 317.73,
+          "y": 629.82,
+          "width": 243.98,
+          "height": 63.81,
+          "fontSize": 9.06,
+          "text": "3.1.2 数据处理。我们需要将所有对象渲染成图像格式以微调 2D 扩散模型。我们使用 three-vrm [Pixiv 2019] 框架来渲染这些角色。我们首先获取“A 姿势”角色和有姿势的角色以生成规范姿态与随机姿态的图像对。对于 A 姿势角色，我们将左右手臂的关节旋转设置为 45°。"
+        },
+        {
+          "x": 351.5,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., 卷 43, 第 4 期, 第 84 篇文章。出版日期：2024 年 7 月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:16:11",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "2": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 2,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 51.81,
+          "y": 55.89,
+          "width": 255.82,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "84:2 • Hao-Yang Peng, Jia-Peng Zhang, Meng-Hao Guo, Yan-Pei Cao, and Shi-Min Hu"
+        },
+        {
+          "x": 51.51,
+          "y": 82.65,
+          "width": 243.41,
+          "height": 47.86,
+          "fontSize": 8.05,
+          "text": "ACM Reference Format: Hao-Yang Peng, Jia-Peng Zhang, Meng-Hao Guo, Yan-Pei Cao, and Shi-Min Hu. 2024. CharacterGen: Efficient 3D Character Generation from Single Images with Multi-View Pose Canonicalization. ACM Trans. Graph. 43, 4, Article 84 (July 2024), 13 pages. https://doi.org/10.1145/3658217"
+        },
+        {
+          "x": 51.81,
+          "y": 154.67,
+          "width": 87.34,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "1 引言"
+        },
+        {
+          "x": 51.38,
+          "y": 169.68,
+          "width": 243.65,
+          "height": 151.36,
+          "fontSize": 9.02,
+          "text": "数字内容行业的快速发展使得高质量3D内容的制作在电影、视频游戏、在线流媒体和虚拟现实（VR）等多个领域变得至关重要。尽管手工建模的3D内容可以达到极高的质量，但其所需的大量时间和人力投入构成了显著瓶颈。为了解决这一问题，近来出现了大量令人振奋的研究[Alwala et al . 2022; Deng et al . 2023; Jun and Nichol 2023; Liu et al . 2023b,d; Long et al . 2023; Melas-Kyriazi et al . 2023; Nichol et al . 2022; Qian et al . 2023; Raj et al . 2023; Tang et al . 2023a; Wang et al . 2021b; Wang and Shi 2023; Wen et al . 2023; Wu et al . 2023a; Yoo et al . 2023]，这些研究聚焦于从单张图像生成3D模型。该方法显著降低了新手用户的入门门槛，促进了3D内容创作的普及，并有可能对该领域带来变革。"
+        },
+        {
+          "x": 51.38,
+          "y": 322.97,
+          "width": 244.18,
+          "height": 250.13,
+          "fontSize": 9.06,
+          "text": "3D角色模型通常具有复杂的关节结构，在二维图像中频繁出现自遮挡，这给重建、生成和动画带来了很大挑战。此外，这些角色可能呈现出各种身体姿势，其中有些姿势罕见且难以准确解释，导致数据域多样但不平衡。这些复杂性阻碍了模型的有效生成、绑定（rigging）和动画。因此，通用的3D生成技术[Chen et al . 2023a; Lin et al . 2023a; Metzer et al . 2023; Poole et al . 2023; Wang et al . 2023a,b]和单视图3D重建方法[Alwala et al . 2022; Hong et al . 2023b; Liu et al . 2023d; Thai et al . 2021; Wang et al . 2021b; Wen et al . 2023; Wu et al . 2023a]常常无法给出最佳结果。先前的研究[Cao et al . 2023; Huang et al . 2023a,b; Kolotouros et al . 2023; Liao et al . 2023; Saito et al . 2019, 2020; Wang et al . 2023c; Xiu et al . 2023, 2022; Zheng et al . 2022]探讨了将三维人体的参数化模型[Alldieck et al . 2021; Li et al . 2017; Loper et al . 2015; Pavlakos et al . 2019]作为3D先验的做法。然而，这些方法主要针对现实人体的比例和较为贴身的服装，限制了其适用性。对于风格化角色而言，这一限制尤为明显：风格化角色通常具有夸张的体型比例和复杂的服饰设计，这对这些方法的适应性和效果提出了挑战。"
+        },
+        {
+          "x": 51.81,
+          "y": 575.02,
+          "width": 243.75,
+          "height": 118.62,
+          "fontSize": 9.06,
+          "text": "在本文中，我们提出了 CharacterGen，一种从单张图像生成规范姿态（canonical pose）下3D角色的新方法。与以往方法相比，我们的方法显著不同：它允许输入图像中的任意体态并输出干净的3D角色模型。CharacterGen的基本思想是，在生成过程中同时对体态进行规范化并生成一致的多视图图像。"
+        },
+        {
+          "x": 317.95,
+          "y": 81.95,
+          "width": 243.76,
+          "height": 19.91,
+          "fontSize": 8.97,
+          "text": "具体而言，我们将每个姿势转换为一种规范的“A-pose”（在3D角色建模中被广泛使用的站姿），并同时确保多视图之间的图像一致性。该双重策略有效解决了自遮挡和姿态歧义的问题，大幅简化了后续的重建、绑定和动画步骤。"
+        },
+        {
+          "x": 317.62,
+          "y": 103.86,
+          "width": 244.09,
+          "height": 304.85,
+          "fontSize": 9.06,
+          "text": "我们的3D角色生成方法包含两个紧密相连的阶段：首先，将单张图像提升为多个视点的图像，同时对输入姿态进行规范化；随后，基于该规范姿态对3D角色进行重建。该方法依赖于两个关键洞见：首先，它借鉴并整合了近来可控图像生成领域的成熟原则和成功技术[Ye et al . 2023; Zhang and Agrawala 2023]；其次，它克服了针对3D角色的稀疏视图重建的挑战。通过聚焦于规范姿态——在该姿态下几何和纹理结构更清晰且自遮挡最小——我们的方法简化了从有限视图重构几何和纹理的任务。第一阶段采用基于扩散的、以图像为条件的多视图生成模型[Liu et al . 2023a; Shi et al . 2023a; Tang et al . 2023b; Wang and Shi 2023]，该模型能够将输入图像中的全局与局部角色特征捕捉并转换到规范姿态，从而促进跨多视图的一致性规范姿态图像的生成。第二阶段则使用基于Transformer的、可泛化的稀疏视图重建模型[Hong et al . 2023b]，该模型能够根据第一阶段产生的图像生成粗糙带纹理的3D角色模型。随后我们通过投影纹理映射和泊松融合（Poisson Blending）[Pérez et al . 2003]进一步提高纹理分辨率，得到细致的最终模型。此外，在规范姿态下生成角色也大幅有利于下游应用，如绑定和动画。我们在图1中展示了带动画的生成3D角色。我们的整个生成过程耗时少于1分钟。"
+        },
+        {
+          "x": 317.52,
+          "y": 410.77,
+          "width": 244.19,
+          "height": 74.65,
+          "fontSize": 9.06,
+          "text": "为训练我们的流水线，我们构建了一个多姿态、多视角的角色数据集，选取二次元（anime）角色作为重点类别，原因是它们在网络上具有广泛可得性，尤其是在如 VRoid Hub 1 等平台上。我们收集了13,746个角色，并在多种体态下从不同视角渲染这些角色。该大规模集合被整理为我们称之为 Anime3D 的数据集。"
+        },
+        {
+          "x": 326.92,
+          "y": 487.42,
+          "width": 229.25,
+          "height": 8.96,
+          "fontSize": 8.97,
+          "text": "总结来说，本文的主要贡献包括："
+        },
+        {
+          "x": 332.93,
+          "y": 499.87,
+          "width": 228.78,
+          "height": 130.16,
+          "fontSize": 9.06,
+          "text": "• 一种基于图像条件的扩散模型，能够从不同输入姿势生成受控的规范姿态下多视角一致的角色图像，有效应对自遮挡和姿态歧义等挑战。 • 一个简化的流水线，将我们的多视图图像生成扩散模型与基于Transformer的重建模型相结合，该流水线能高效地将单视图输入转换为带细节的3D角色模型。 • 一个精选的数据集，包含13,746个二次元角色，在多种体态与视角下渲染，为我们的模型训练与评估以及未来3D角色生成研究提供了多样化的资源。"
+        },
+        {
+          "x": 317.96,
+          "y": 642.38,
+          "width": 90.8,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "2 相关工作"
+        },
+        {
+          "x": 317.69,
+          "y": 657.25,
+          "width": 242.51,
+          "height": 20.02,
+          "fontSize": 9.06,
+          "text": "本节主要讨论基于扩散的3D物体与虚拟形象（avatar）生成相关工作。我们的 CharacterGen 也采用"
+        },
+        {
+          "x": 51.56,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., Vol. 43, No. 4, Article 84. 出版日期：2024年7月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:16:21",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "4": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 4,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 51.81,
+          "y": 55.89,
+          "width": 255.82,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "84:4 • Hao-Yang Peng、Jia-Peng Zhang、Meng-Hao Guo、Yan-Pei Cao 与 Shi-Min Hu"
+        },
+        {
+          "x": 130.05,
+          "y": 180.59,
+          "width": 16.94,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "CLIP"
+        },
+        {
+          "x": 378.29,
+          "y": 238.55,
+          "width": 107.9,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "IDUNet 多视图 UNet"
+        },
+        {
+          "x": 63.32,
+          "y": 192.68,
+          "width": 49.41,
+          "height": 11.17,
+          "fontSize": 9.53,
+          "text": "输入图像"
+        },
+        {
+          "x": 66.06,
+          "y": 88.08,
+          "width": 80.4,
+          "height": 15.51,
+          "fontSize": 9.53,
+          "text": "CLIP 固定文本"
+        },
+        {
+          "x": 73.14,
+          "y": 99.63,
+          "width": 27.36,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "提示词"
+        },
+        {
+          "x": 61.47,
+          "y": 238.8,
+          "width": 51.63,
+          "height": 9.94,
+          "fontSize": 8.47,
+          "text": "相机矩阵"
+        },
+        {
+          "x": 70.68,
+          "y": 350.9,
+          "width": 69.56,
+          "height": 9.31,
+          "fontSize": 8.0,
+          "text": "多视角 OpenPose"
+        },
+        {
+          "x": 459.12,
+          "y": 350.9,
+          "width": 59.44,
+          "height": 9.31,
+          "fontSize": 8.0,
+          "text": "多视角输出"
+        },
+        {
+          "x": 263.87,
+          "y": 85.67,
+          "width": 33.3,
+          "height": 12.42,
+          "fontSize": 10.59,
+          "text": "IDUNet"
+        },
+        {
+          "x": 243.75,
+          "y": 330.08,
+          "width": 74.08,
+          "height": 12.41,
+          "fontSize": 10.59,
+          "text": "多视图 UNet"
+        },
+        {
+          "x": 161.45,
+          "y": 85.14,
+          "width": 58.56,
+          "height": 9.94,
+          "fontSize": 8.47,
+          "text": "文本嵌入"
+        },
+        {
+          "x": 166.03,
+          "y": 128.99,
+          "width": 50.22,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "VAE 编码"
+        },
+        {
+          "x": 158.91,
+          "y": 172.71,
+          "width": 65.56,
+          "height": 9.94,
+          "fontSize": 8.47,
+          "text": "图像嵌入"
+        },
+        {
+          "x": 156.66,
+          "y": 214.78,
+          "width": 70.72,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "相机嵌入"
+        },
+        {
+          "x": 366.93,
+          "y": 87.42,
+          "width": 53.43,
+          "height": 8.69,
+          "fontSize": 8.0,
+          "text": "时间步嵌入"
+        },
+        {
+          "x": 378.38,
+          "y": 121.88,
+          "width": 25.63,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "ResNet"
+        },
+        {
+          "x": 376.78,
+          "y": 155.94,
+          "width": 28.82,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "自注意力 (SelfAttn)"
+        },
+        {
+          "x": 373.43,
+          "y": 186.19,
+          "width": 35.52,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "交叉注意力 (CrossAttn)"
+        },
+        {
+          "x": 373.33,
+          "y": 221.65,
+          "width": 35.73,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "上/下采样"
+        },
+        {
+          "x": 444.39,
+          "y": 121.88,
+          "width": 25.63,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "ResNet"
+        },
+        {
+          "x": 439.05,
+          "y": 150.98,
+          "width": 36.31,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "多视图"
+        },
+        {
+          "x": 442.8,
+          "y": 161.15,
+          "width": 28.83,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "自注意力 (SelfAttn)"
+        },
+        {
+          "x": 439.45,
+          "y": 186.19,
+          "width": 35.5,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "交叉注意力 (CrossAttn)"
+        },
+        {
+          "x": 439.35,
+          "y": 221.65,
+          "width": 35.71,
+          "height": 9.93,
+          "fontSize": 8.47,
+          "text": "上/下采样"
+        },
+        {
+          "x": 529.52,
+          "y": 170.15,
+          "width": 13.66,
+          "height": 7.45,
+          "fontSize": 8.0,
+          "text": "视图"
+        },
+        {
+          "x": 529.52,
+          "y": 138.76,
+          "width": 13.66,
+          "height": 7.45,
+          "fontSize": 8.0,
+          "text": "视图"
+        },
+        {
+          "x": 529.31,
+          "y": 106.86,
+          "width": 13.66,
+          "height": 7.45,
+          "fontSize": 8.0,
+          "text": "视图"
+        },
+        {
+          "x": 529.52,
+          "y": 202.18,
+          "width": 13.66,
+          "height": 7.45,
+          "fontSize": 8.0,
+          "text": "视图"
+        },
+        {
+          "x": 434.37,
+          "y": 87.55,
+          "width": 48.01,
+          "height": 8.69,
+          "fontSize": 8.0,
+          "text": "相机嵌入"
+        },
+        {
+          "x": 349.86,
+          "y": 106.92,
+          "width": 8.69,
+          "height": 37.21,
+          "fontSize": 8.0,
+          "text": "文本嵌入"
+        },
+        {
+          "x": 415.8,
+          "y": 101.46,
+          "width": 8.69,
+          "height": 43.31,
+          "fontSize": 8.0,
+          "text": "图像嵌入"
+        },
+        {
+          "x": 126.29,
+          "y": 137.25,
+          "width": 23.62,
+          "height": 10.87,
+          "fontSize": 8.47,
+          "text": "VAE 编码"
+        },
+        {
+          "x": 375.89,
+          "y": 329.55,
+          "width": 23.64,
+          "height": 11.0,
+          "fontSize": 8.47,
+          "text": "VAE 解码"
+        },
+        {
+          "x": 122.43,
+          "y": 220.25,
+          "width": 30.75,
+          "height": 19.97,
+          "fontSize": 8.47,
+          "text": "相机编码器"
+        },
+        {
+          "x": 166.94,
+          "y": 316.72,
+          "width": 30.12,
+          "height": 20.09,
+          "fontSize": 8.47,
+          "text": "姿态编码器"
+        },
+        {
+          "x": 419.36,
+          "y": 163.35,
+          "width": 8.69,
+          "height": 20.71,
+          "fontSize": 8.0,
+          "text": "拼接 (concat)"
+        },
+        {
+          "x": 494.88,
+          "y": 107.74,
+          "width": 14.56,
+          "height": 12.56,
+          "fontSize": 8.0,
+          "text": "参考潜在向量 (Ref-Latent)"
+        },
+        {
+          "x": 51.81,
+          "y": 377.23,
+          "width": 509.61,
+          "height": 17.93,
+          "fontSize": 8.0,
+          "text": "图 3. 生成四个一致性视图的流水线，展示了我们的 IDUNet 如何提取局部像素级特征以增强多视图 UNet。这里 “Q”、“K” 和 “V” 分别表示注意力机制中的查询、键和值矩阵。"
+        },
+        {
+          "x": 51.49,
+          "y": 412.22,
+          "width": 244.07,
+          "height": 132.02,
+          "fontSize": 9.06,
+          "text": "在 Z 轴上将头部和左右大腿上端分别旋转 6°。所有其他关节参数保持不变。对于有姿态的角色设置，我们从 Mixamo [MixamoInc. 2009] 下载了 10 个骨骼动画，包括坐、唱歌、走路等。我们从这些动画中随机选择帧并将相应动作应用到 VRM 角色模型上。此外，我们也随机化嘴部和眼睛的关节以生成各种面部表情，例如眨眼。我们将角色模型的包围盒归一化到 [-0.5, 0.5]^3。相机视野 (FoV) 设为 40°，相机与场景原点的距离设为 1.5。角色图像在环境光和定向光下渲染。"
+        },
+        {
+          "x": 51.54,
+          "y": 546.2,
+          "width": 243.89,
+          "height": 107.63,
+          "fontSize": 9.06,
+          "text": "在训练过程中，我们将四张 A-pose 图像与一张有姿态图像配对，因为正交视图下的四张图像已包含足够的外观信息来描述一个 3D 角色。因此，自然地将所有物体渲染为方位角 {0°, 90°, 180°, 270°}，仰角为 0°。为了增强模型对身体空间布局的理解，我们还渲染了三组具有随机初始方位角的视图，如图 2 所示。我们还渲染了 4 个方位角和仰角完全随机的额外视图，以用于微调可泛化的重建模型（见 Sec. 3.3）。"
+        },
+        {
+          "x": 317.95,
+          "y": 413.49,
+          "width": 182.09,
+          "height": 21.92,
+          "fontSize": 9.96,
+          "text": "3.2 多视角图像生成与姿态标准化"
+        },
+        {
+          "x": 317.52,
+          "y": 440.32,
+          "width": 244.19,
+          "height": 63.8,
+          "fontSize": 9.06,
+          "text": "我们现在讨论如何从给定的角色图像生成高度一致的多视角图像。整体框架如图 3 所示。我们使用 IDUNet 将输入图像的补丁级外观特征传递给多视图去噪 UNet。同时我们引入了姿态嵌入网络，以提供更多的角色布局信息来辅助姿态标准化任务。"
+        },
+        {
+          "x": 317.73,
+          "y": 542.2,
+          "width": 243.85,
+          "height": 151.42,
+          "fontSize": 9.06,
+          "text": "3.2.1 IDUNet。我们的 IDUNet 旨在保留来自原始有姿态图像的充足特征，并确保四个生成视图之间具有高度一致性。先前工作 IP-Adapter [Ye et al. 2023] 在扩散 UNet 结构中加入了 adapter 模块，通过输入图像特征与潜变量特征之间的交叉注意力将外观信息传递到生成图像中。然而在实践中，我们观察到 IP-Adapter 无法从输入图像中捕获完整的细节纹理，因为此类方法仅使用条件图像的全局 CLIP 嵌入，在图像编码过程中丢失了像素级细节，导致结果不一致。为了更好地结合条件图像的特征，我们提出了 IDUNet，在生成过程中引入像素级的引导。受 ControlNet [Zhang and Agrawala 2023] 启发，其结构为"
+        },
+        {
+          "x": 51.56,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., 卷 43，第 4 期，文章 84。出版日期：2024 年 7 月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:16:27",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "8": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 8,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 51.81,
+          "y": 55.89,
+          "width": 255.82,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "84:8 • Hao-Yang Peng、Jia-Peng Zhang、Meng-Hao Guo、Yan-Pei Cao 和 Shi-Min Hu"
+        },
+        {
+          "x": 65.89,
+          "y": 77.24,
+          "width": 434.27,
+          "height": 13.63,
+          "fontSize": 9.06,
+          "text": "输入图像 本方法 Zero123 SyncDreamer"
+        },
+        {
+          "x": 51.81,
+          "y": 655.81,
+          "width": 508.28,
+          "height": 9.95,
+          "fontSize": 8.0,
+          "text": "图5. 我们将生成的四张 A 姿势角色图像与其他方法进行比较。所有示例的方位角均设置为 {0°，90°，180°，270°}。© kinoko7"
+        },
+        {
+          "x": 51.56,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., 卷 43，期 4，文章 84。出版日期：2024 年 7 月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:17:17",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "6": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 6,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 51.81,
+          "y": 55.89,
+          "width": 255.82,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "84:6 • Hao-Yang Peng、Jia-Peng Zhang、Meng-Hao Guo、Yan-Pei Cao 和 Shi-Min Hu"
+        },
+        {
+          "x": 271.5,
+          "y": 87.31,
+          "width": 58.65,
+          "height": 9.05,
+          "fontSize": 9.06,
+          "text": "提取网格与"
+        },
+        {
+          "x": 279.2,
+          "y": 98.17,
+          "width": 43.29,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "UV 展开"
+        },
+        {
+          "x": 122.19,
+          "y": 84.89,
+          "width": 76.63,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "基于 Transformer 的"
+        },
+        {
+          "x": 130.04,
+          "y": 95.76,
+          "width": 58.91,
+          "height": 9.05,
+          "fontSize": 9.06,
+          "text": "重建"
+        },
+        {
+          "x": 204.41,
+          "y": 92.37,
+          "width": 50.02,
+          "height": 9.05,
+          "fontSize": 9.06,
+          "text": "三平面 SDF"
+        },
+        {
+          "x": 361.63,
+          "y": 105.49,
+          "width": 57.76,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "粗糙纹理"
+        },
+        {
+          "x": 359.01,
+          "y": 240.39,
+          "width": 61.01,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "精细纹理"
+        },
+        {
+          "x": 248.37,
+          "y": 181.65,
+          "width": 38.11,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "几何"
+        },
+        {
+          "x": 251.96,
+          "y": 306.34,
+          "width": 60.52,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "反向投影"
+        },
+        {
+          "x": 324.17,
+          "y": 270.78,
+          "width": 46.89,
+          "height": 19.92,
+          "fontSize": 9.06,
+          "text": "纹理聚合"
+        },
+        {
+          "x": 88.01,
+          "y": 297.36,
+          "width": 87.65,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "多视图图像输入"
+        },
+        {
+          "x": 358.86,
+          "y": 186.76,
+          "width": 68.91,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "拉普拉斯平滑"
+        },
+        {
+          "x": 71.03,
+          "y": 145.44,
+          "width": 55.37,
+          "height": 9.05,
+          "fontSize": 9.06,
+          "text": "相机条件"
+        },
+        {
+          "x": 438.3,
+          "y": 183.52,
+          "width": 52.51,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "粗糙模型"
+        },
+        {
+          "x": 438.81,
+          "y": 302.52,
+          "width": 55.75,
+          "height": 9.06,
+          "fontSize": 9.06,
+          "text": "精细模型"
+        },
+        {
+          "x": 51.81,
+          "y": 334.39,
+          "width": 508.58,
+          "height": 17.93,
+          "fontSize": 8.0,
+          "text": "图 4. 从生成的多视图图像生成最终精细角色网格的流程图。第一阶段，我们利用深度基于 Transformer 的网络生成具有粗糙纹理的角色，然后使用纹理反向投影策略来增强生成网格的外观。"
+        },
+        {
+          "x": 51.81,
+          "y": 371.84,
+          "width": 242.24,
+          "height": 19.98,
+          "fontSize": 9.04,
+          "text": "图像。LPIPS 损失用于从输入图像中提取感知信息。训练目标如式 (4) 所示。"
+        },
+        {
+          "x": 105.25,
+          "y": 397.06,
+          "width": 189.33,
+          "height": 12.39,
+          "fontSize": 8.97,
+          "text": "𝐿_recon = 𝜆_1 𝐿_mse + 𝜆_2 𝐿_mask + 𝜆_3 𝐿_LPIPS (4)"
+        },
+        {
+          "x": 51.81,
+          "y": 413.43,
+          "width": 242.44,
+          "height": 32.9,
+          "fontSize": 9.03,
+          "text": "其中，𝜆_1、𝜆_2 和 𝜆_3 为超参数，默认设置为 1、0.1 和 0.5。我们对提取的网格应用拉普拉斯平滑，以进一步减少表面噪声。"
+        },
+        {
+          "x": 51.47,
+          "y": 454.48,
+          "width": 243.56,
+          "height": 239.19,
+          "fontSize": 9.06,
+          "text": "3.3.2 3D 角色精修。我们的重建网络能够快速重建角色的 3D 隐式表示，并可从重建的三平面中用 DMTet [Shen et al. 2021] 提取最终网格及粗糙的 UV 图。然而，由于基于 DMTet 的提取过程在 UV 展开时会丢失外观信息，生成的网格仍然缺乏纹理细节。为了解决该问题，我们进一步利用生成的四视图图像来提升生成纹理图的质量。在此步骤中为实现高效光栅化，我们采用 NvDiffRast [Laine et al. 2020] 作为渲染器。由于生成的四视图图像分辨率低于纹理图，可能有多个纹素（texel）被投影到同一像素。在基于可微渲染的优化过程中，这些纹素的梯度会变得嘈杂。输入视图的稀疏性使得修正这些嘈杂纹素更加困难，导致输出精细纹理图严重退化。为规避该问题，我们将四视图图像投回到纹理空间的纹素，并使用深度测试移除被遮挡的纹素。我们还注意到，直接将四视图图像回投到网格上会在角色轮廓处产生嘈杂纹素。我们计算四个正交相机视方向与法线贴图的内积，"
+        },
+        {
+          "x": 316.44,
+          "y": 371.83,
+          "width": 243.93,
+          "height": 52.87,
+          "fontSize": 9.06,
+          "text": "内积大于 -0.2 的纹素被忽略，以消除轮廓周围的噪声。对于在多视图中重叠的纹素，我们选择与粗糙纹理 RGB 值最接近的回投纹素。随后我们利用 Poisson Blending [Pérez et al. 2003] 将投影的纹素与原始纹素进行聚合，以减少最终纹理中的接缝。"
+        },
+        {
+          "x": 317.95,
+          "y": 435.87,
+          "width": 118.36,
+          "height": 24.65,
+          "fontSize": 9.96,
+          "text": "4 实验 4.1 实现细节"
+        },
+        {
+          "x": 317.52,
+          "y": 465.57,
+          "width": 244.19,
+          "height": 173.28,
+          "fontSize": 9.06,
+          "text": "我们将 Anime3D 数据集按照 50:1 的比例划分为训练集和测试集。我们使用 Stable Diffusion 2.1 模型作为 IDUNet 和多视图 UNet 的基础模型。训练过程在 8 块 NVIDIA A800 GPU 上进行：对 512 × 512 分辨率的图像训练 3 天，对 768 × 512 分辨率的图像训练另 2 天。在每个训练步骤中，我们同时训练 IDUNet 和多视图 UNet。我们首先从 Anime3D 中采样一组四视图图像和一张单条件姿态图像。鉴于我们希望生成方位角为 {0°，90°，180°，270°} 的四张图像，我们以 0.8 的概率采样该组。我们也在训练步骤中包含其他四视图图像组，以增强扩散模型对 3D 角色的空间理解。我们采样的正视姿态图像方位角范围为 [−90°，90°]。在训练阶段，姿态图像被输入到 IDUNet，四视图图像被送入多视图 UNet。"
+        },
+        {
+          "x": 317.95,
+          "y": 640.78,
+          "width": 242.48,
+          "height": 52.88,
+          "fontSize": 9.06,
+          "text": "为了微调基于 Transformer 的重建模型，我们先使用 NeRF 表示微调 50 个 epoch，然后在 SDF 上再微调 30 个 epoch。微调过程在 8 块 A800 GPU 上耗时 1 天。由于 CharacterGen 在推理阶段不需要训练，整个生成流水线（包括四"
+        },
+        {
+          "x": 51.56,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., Vol. 43, No. 4, Article 84。出版日期：2024 年 7 月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:17:24",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "7": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 7,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 219.05,
+          "y": 55.89,
+          "width": 341.14,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "CharacterGen: 基于单图像的多视角姿态标准化高效3D角色生成 • 84:7"
+        },
+        {
+          "x": 51.59,
+          "y": 79.3,
+          "width": 242.45,
+          "height": 27.9,
+          "fontSize": 8.05,
+          "text": "表 1. 我们展示了在 Anime3D 测试集上用于评估 CharacterGen 有效性的 2D 多视角生成和 3D 角色生成方法的定量指标。"
+        },
+        {
+          "x": 57.71,
+          "y": 124.09,
+          "width": 227.3,
+          "height": 9.61,
+          "fontSize": 8.97,
+          "text": "方法 | SSIM ↑ | LPIPS ↓ | FID ↓ | CD ↓"
+        },
+        {
+          "x": 57.71,
+          "y": 140.16,
+          "width": 220.54,
+          "height": 63.81,
+          "fontSize": 8.97,
+          "text": "CharacterGen（2D） 0.901 0.086 0.019 - Zero123 0.768 0.224 1.42 - Zero123（微调） 0.813 0.175 1.34 - SyncDreamer 0.807 0.194 0.396 - SyncDreamer（微调） 0.822 0.17 0.37 - IP-Adapter+SDXL 0.845 0.143 0.074 -"
+        },
+        {
+          "x": 57.71,
+          "y": 210.43,
+          "width": 230.43,
+          "height": 30.93,
+          "fontSize": 8.97,
+          "text": "CharacterGen（3D） 0.898 0.093 0.032 0.001 Magic123 0.873 0.134 0.116 0.0034 ImageDream 0.886 0.11 0.345 0.002"
+        },
+        {
+          "x": 51.81,
+          "y": 271.7,
+          "width": 243.22,
+          "height": 19.86,
+          "fontSize": 8.97,
+          "text": "（规范姿态图像生成、3D 角色网格重建和纹理贴图精修）都可以在单个 GPU 上运行。"
+        },
+        {
+          "x": 51.81,
+          "y": 303.71,
+          "width": 121.66,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "4.2 结果与比较"
+        },
+        {
+          "x": 51.38,
+          "y": 318.59,
+          "width": 244.18,
+          "height": 30.95,
+          "fontSize": 9.06,
+          "text": "我们在 2D 多视角角色图像生成和 3D 角色网格生成两方面进行实验，以评估 CharacterGen 的效率与有效性。"
+        },
+        {
+          "x": 51.81,
+          "y": 359.13,
+          "width": 243.75,
+          "height": 107.67,
+          "fontSize": 9.06,
+          "text": "4.2.1 2D 多视角生成。我们在 Anime3D 的测试集图像以及在线来源的图像上测试模型，并将结果与 Zero123 [Liu et al. 2023c] 和 SyncDreamer [Liu et al. 2023a] 的结果进行比较。比较结果如图 5 所示。可以看出，面对一些困难的身体姿态，Zero123 和 SyncDreamer 在保留生成图像的几何和外观信息方面存在困难。我们的 CharacterGen 能够有效地进行规范姿态校准，并在四个视图之间生成一致的角色图像，从而显著提升后续的角色网格重建过程。"
+        },
+        {
+          "x": 51.81,
+          "y": 468.86,
+          "width": 243.75,
+          "height": 85.61,
+          "fontSize": 9.06,
+          "text": "我们还在 Anime3D 的测试集上对所有角色图像进行实验。我们对基线方法在 Anime3D 上微调 100 个 epoch，并在表 1 上半部分展示质量指标。我们校准后的 A-pose 图像与真实的 A-pose 图像做基准比较，而其他方法生成的图像则与对应的有姿态图像比较。结果评估了 CharacterGen 出色的生成质量及其与多视角扩散模型的一致性。"
+        },
+        {
+          "x": 51.38,
+          "y": 564.2,
+          "width": 244.18,
+          "height": 129.46,
+          "fontSize": 9.06,
+          "text": "4.2.2 3D 角色生成。本节中，我们将生成的 3D 角色与基于图像提示的 3D 角色生成方法进行比较。ImageDream [Wang and Shi 2023] 和 Magic123 [Qian et al. 2023] 均采用基于 SDS 的优化。TeCH [Huang et al. 2023b] 在 ECON [Xiu et al. 2023] 的基础上扩展，并使用 DreamBooth [Ruiz et al. 2023] 实现图像提示生成。我们在图 6 中可视化结果。我们还在 Anime3D 测试集上对 3D 生成结果进行了定量实验。纹理质量指标通过比较四个正交视图渲染图像与真实图像获得。我们选择 Chamfer Distance（CD）作为评估生成网格几何质量的指标。我们将网格归一化到"
+        },
+        {
+          "x": 317.74,
+          "y": 79.3,
+          "width": 242.45,
+          "height": 17.94,
+          "fontSize": 8.05,
+          "text": "表 2. 生成单个 3D 角色所需时间。所有方法均不计模型加载时间。"
+        },
+        {
+          "x": 348.65,
+          "y": 114.77,
+          "width": 176.85,
+          "height": 8.97,
+          "fontSize": 8.97,
+          "text": "方法 | 时间"
+        },
+        {
+          "x": 348.65,
+          "y": 130.25,
+          "width": 180.85,
+          "height": 41.84,
+          "fontSize": 8.97,
+          "text": "CharacterGen 1min Magic123 [Qian et al. 2023] 70min ImageDream [Wang and Shi 2023] 45min TeCH [Huang et al. 2023b] 270min"
+        },
+        {
+          "x": 317.95,
+          "y": 194.92,
+          "width": 242.24,
+          "height": 23.11,
+          "fontSize": 8.97,
+          "text": "[-0.5, 0.5]^3 用于计算 CD。定量结果列在表 1 的下半部分。"
+        },
+        {
+          "x": 317.62,
+          "y": 220.09,
+          "width": 244.48,
+          "height": 129.45,
+          "fontSize": 9.06,
+          "text": "可以观察到，得益于我们稳健的四视图重建机制，CharacterGen 有效地避免了“Janus”问题。我们生成的 3D 角色网格在不可见身体部位也表现出令人满意的外观，这要归功于来自 Anime3D 的丰富后视与侧视先验。其他方法生成的大多数 3D 角色存在若干网格面粘连问题，这使得对这些角色进行绑定和动画变得极其困难。CharacterGen 能够成功从棘手姿态的角色生成规范姿态网格，从而便利下游的图形应用。我们还使用 Animate Anyone [Hu et al. 2023] 对其他方法以 A-pose 校准的角色图像进行了评估。更多细节请参见补充材料。"
+        },
+        {
+          "x": 317.31,
+          "y": 358.12,
+          "width": 244.4,
+          "height": 173.37,
+          "fontSize": 9.06,
+          "text": "4.2.3 与 IP-Adapter 的比较。此前工作 IP-Adapter [Ye et al. 2023] 也通过将适配器模块引入扩散模型来支持图像提示生成任务。我们注意到 IP-Adapter 不包含 Stable Diffusion 2.1 的预训练模型，而 Stable Diffusion 2.1 是我们多视图 UNet 的基础模型。因此我们训练了一个 SDXL-base 模型，以在四个方位 {0°, 90°, 180°, 270°} 下生成 2×2 网格的角色图像，总共训练 100 个 epoch。网格图像按 SDXL 的标准分辨率 1024×1024 组织。然后我们将官方预训练的 IP-Adapter-SDXL 集成到基础 SDXL 模型中以获得图像条件的多视图结果。我们在图 7 展示可视化结果，并在表 1 中给出定量结果。可以观察到 IP-Adapter 无法保留细致的外观信息，且可能无法生成正确的角色布局，而 CharacterGen 使用我们的 IDUNet 能有效生成高一致性的多视角角色图像。"
+        },
+        {
+          "x": 317.69,
+          "y": 540.16,
+          "width": 244.02,
+          "height": 85.61,
+          "fontSize": 9.06,
+          "text": "4.2.4 生成速度。我们比较了使用我们的方法和其他基于图像提示的 3D 生成方法生成单个 3D 角色网格所需的时间，比较结果详见表 2。我们的方法显著快于其他替代方案。SyncDreamer 和 Zero123 被用来生成多视角图像。它们的时间开销取决于所选的 3D 重建方法。默认的 NeuS [Wang et al. 2021a] 重建大约需要 10 分钟。"
+        },
+        {
+          "x": 317.95,
+          "y": 636.86,
+          "width": 66.9,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "4.3 用户研究"
+        },
+        {
+          "x": 317.69,
+          "y": 651.73,
+          "width": 244.02,
+          "height": 41.94,
+          "fontSize": 9.06,
+          "text": "为了更好地评估 CharacterGen 的稳健生成能力，我们为用户研究收集了 15 组生成的四视图角色图像和 10 个角色网格。我们将 CharacterGen 生成的结果与第 4.2 节中提到的其他方法进行比较。"
+        },
+        {
+          "x": 351.5,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., Vol. 43, No. 4, Article 84. 出版日期: 2024 年 7 月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:17:35",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "9": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 9,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 219.05,
+          "y": 55.89,
+          "width": 341.14,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "CharacterGen：基于单图像的多视角姿态标准化高效3D角色生成 • 84:9"
+        },
+        {
+          "x": 54.84,
+          "y": 79.04,
+          "width": 111.21,
+          "height": 10.92,
+          "fontSize": 9.32,
+          "text": "输入图像 我们的方法"
+        },
+        {
+          "x": 258.49,
+          "y": 79.16,
+          "width": 257.5,
+          "height": 12.66,
+          "fontSize": 9.32,
+          "text": "Magic123 ImageDream TeCH"
+        },
+        {
+          "x": 120.23,
+          "y": 661.74,
+          "width": 371.54,
+          "height": 7.97,
+          "fontSize": 8.0,
+          "text": "图6. 我们将所生成的3D角色在外观和几何形状上与其他方法进行了比较。© kinoko7"
+        },
+        {
+          "x": 351.5,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., 卷 43, 第 4 期, 文章 84。出版日期：2024年7月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:17:40",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "10": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 10,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 51.81,
+          "y": 55.89,
+          "width": 259.07,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "84:10 • Hao‑Yang Peng、Jia‑Peng Zhang、Meng‑Hao Guo、Yan‑Pei Cao 和 Shi‑Min Hu"
+        },
+        {
+          "x": 89.52,
+          "y": 79.3,
+          "width": 432.74,
+          "height": 7.97,
+          "fontSize": 8.0,
+          "text": "表3. 用户研究统计。我们展示了对2D多视角图像和3D带纹理角色网格的投票结果。"
+        },
+        {
+          "x": 63.14,
+          "y": 104.81,
+          "width": 506.23,
+          "height": 8.97,
+          "fontSize": 8.97,
+          "text": "指标 CharacterGen Zero123(2D) SyncDreamer(2D) Magic123(3D) ImageDream(3D)"
+        },
+        {
+          "x": 63.14,
+          "y": 120.24,
+          "width": 484.94,
+          "height": 41.89,
+          "fontSize": 8.97,
+          "text": "2D多视角风格一致性 85.4% 10.5% 4.1% - - 2D多视角一致性 81.0% 17.1% 1.9% - - 3D角色几何质量 78.6% - - 2.86% 18.6% 3D角色纹理质量 87.1% - - 1.9% 11.0%"
+        },
+        {
+          "x": 60.97,
+          "y": 179.54,
+          "width": 50.79,
+          "height": 11.48,
+          "fontSize": 9.8,
+          "text": "输入图像"
+        },
+        {
+          "x": 153.96,
+          "y": 179.41,
+          "width": 118.45,
+          "height": 11.61,
+          "fontSize": 9.8,
+          "text": "我们的 IP‑Adapter"
+        },
+        {
+          "x": 56.92,
+          "y": 458.94,
+          "width": 232.01,
+          "height": 7.98,
+          "fontSize": 8.0,
+          "text": "图7. 我们比较了 CharacterGen 与 IP‑Adapter‑SDXL 的结果。"
+        },
+        {
+          "x": 51.59,
+          "y": 482.08,
+          "width": 242.46,
+          "height": 27.9,
+          "fontSize": 8.0,
+          "text": "表4. 我们使用 CLIP 分数评估生成角色与给定条件图像在2D多视角图像和3D渲染图像下的风格相似度。"
+        },
+        {
+          "x": 65.25,
+          "y": 527.51,
+          "width": 215.36,
+          "height": 8.97,
+          "fontSize": 8.97,
+          "text": "方法(2D) CLIP 分数 方法(3D) CLIP 分数"
+        },
+        {
+          "x": 65.25,
+          "y": 540.97,
+          "width": 205.57,
+          "height": 32.9,
+          "fontSize": 8.97,
+          "text": "方法(2D)：CharacterGen 83.69，Zero123 79.02，SyncDreamer 75.41 方法(3D)：CharacterGen 79.77，Magic123 74.71，ImageDream 73.65"
+        },
+        {
+          "x": 51.54,
+          "y": 596.94,
+          "width": 243.88,
+          "height": 96.7,
+          "fontSize": 9.06,
+          "text": "我们邀请了21名志愿者，首先评估条件图像与生成的四视图图像之间的风格一致性，以及生成的多视图图像中的空间一致性。然后，他们被要求评估生成的3D角色模型的几何质量和纹理质量。对于每个示例，志愿者需投票选择他们认为最好的一个。如表3所示，在2D和3D生成任务中，我们的 CharacterGen 相较其他方法获得了显著更高的偏好。"
+        },
+        {
+          "x": 325.59,
+          "y": 284.47,
+          "width": 51.25,
+          "height": 7.9,
+          "fontSize": 8.0,
+          "text": "输入条件图像"
+        },
+        {
+          "x": 446.19,
+          "y": 182.51,
+          "width": 47.26,
+          "height": 8.77,
+          "fontSize": 8.0,
+          "text": "冻结的 IDUNet"
+        },
+        {
+          "x": 431.64,
+          "y": 310.07,
+          "width": 60.83,
+          "height": 9.83,
+          "fontSize": 8.0,
+          "text": "🔥 已训练的 IDUNet"
+        },
+        {
+          "x": 317.95,
+          "y": 334.21,
+          "width": 242.25,
+          "height": 17.93,
+          "fontSize": 8.05,
+          "text": "图8. 冻结的 IDUNet 无法从提示图像中提取足够的外观信息，并生成不相似的图像。"
+        },
+        {
+          "x": 317.95,
+          "y": 371.33,
+          "width": 243.76,
+          "height": 129.56,
+          "fontSize": 9.06,
+          "text": "我们还以与用户研究相同的方式，定量评估生成结果与输入图像之间的一致性。我们采用 CLIP 分数作为度量，并使用 ViT‑B/32 作为骨干模型。对于2D多视角图像生成，我们计算输入图像与四张生成图像的 CLIP 分数。对于3D角色生成，我们首先以3°的方位角间隔渲染3D表示，然后计算输入图像与所有渲染帧之间的 CLIP 分数。如表4所示，我们的 CharacterGen 在2D和3D生成上均取得更优的结果，这评估了我们的 IDUNet、多视角 UNet 及后续重建模型在鲁棒外观建模方面的能力。"
+        },
+        {
+          "x": 317.95,
+          "y": 510.85,
+          "width": 82.93,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "4.4 消融研究"
+        },
+        {
+          "x": 317.62,
+          "y": 525.75,
+          "width": 244.09,
+          "height": 85.72,
+          "fontSize": 9.06,
+          "text": "4.4.1 IDUNet。为证明联合训练 IDUNet 的重要性，我们在冻结预训练的 Stable Diffusion 2.1 模型的 IDUNet 的情况下训练 CharacterGen 网络。生成的四视图图像如图8所示。结果表明，生成的图像未能保留足够的输入图像特征，导致相似度降低。这表明有必要用干净的带姿态图像对 IDUNet 进行联合微调，以增强其提取衣物和面部外观细节的能力。"
+        },
+        {
+          "x": 317.73,
+          "y": 618.99,
+          "width": 243.98,
+          "height": 74.65,
+          "fontSize": 9.06,
+          "text": "4.4.2 姿态嵌入网络。姿态嵌入网络在保持生成四视图图像中角色布局方面起着关键作用。我们生成了不使用姿态嵌入网络的额外图像集，并在图9中展示了典型结果。可以观察到，在没有姿态嵌入网络的情况下，生成的角色图像可能不会位于图像中央。此外，缺乏布局引导会"
+        },
+        {
+          "x": 51.56,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., 卷 43，期 4，文章 84。出版日期：2024年7月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:18:32",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "11": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 11,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 215.81,
+          "y": 55.89,
+          "width": 344.38,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "CharacterGen: 基于单图像的多视角姿态标准化高效3D角色生成 • 84:11"
+        },
+        {
+          "x": 162.44,
+          "y": 173.88,
+          "width": 76.17,
+          "height": 6.87,
+          "fontSize": 8.0,
+          "text": "带姿态嵌入网络"
+        },
+        {
+          "x": 162.7,
+          "y": 78.53,
+          "width": 75.32,
+          "height": 6.87,
+          "fontSize": 8.0,
+          "text": "无姿态嵌入网络"
+        },
+        {
+          "x": 51.81,
+          "y": 193.47,
+          "width": 242.43,
+          "height": 17.93,
+          "fontSize": 8.0,
+          "text": "图9. 若无姿态嵌入网络，生成的角色可能位置错位。"
+        },
+        {
+          "x": 51.81,
+          "y": 231.9,
+          "width": 242.24,
+          "height": 19.98,
+          "fontSize": 9.04,
+          "text": "可能导致生成不一致的服装部件，从而影响后续步骤中的 3D 重建。"
+        },
+        {
+          "x": 51.81,
+          "y": 262.09,
+          "width": 72.54,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "4.5 应用"
+        },
+        {
+          "x": 51.81,
+          "y": 277.08,
+          "width": 243.75,
+          "height": 74.67,
+          "fontSize": 9.06,
+          "text": "CharacterGen 能生成带有精细纹理贴图的 A-pose 3D 角色，从而简化后续的绑定流程。我们使用 AccuRig [actorcore 2023] 对生成的角色网格进行自动绑定。绑定后的 3D 角色可以作为动画化的 3D 资产在各类领域中直接使用。我们在 Warudo [HakuyaLabs 2023] 中渲染了多种动画绑定模型，并在图10中展示了一些结果。"
+        },
+        {
+          "x": 51.81,
+          "y": 506.84,
+          "width": 242.23,
+          "height": 17.94,
+          "fontSize": 8.05,
+          "text": "图10. 我们为生成的角色进行绑定，并将其作为下游应用中的 3D 资产使用。"
+        },
+        {
+          "x": 51.49,
+          "y": 540.94,
+          "width": 244.07,
+          "height": 74.75,
+          "fontSize": 9.06,
+          "text": "为更好地评估使用 A-pose 角色对骨骼绑定与动画流程的帮助，我们对由 CharacterGen 和 ImageDream [Wang and Shi 2023] 生成的两个人物网格进行了绑定，并在图11中可视化了动画化的角色。可以观察到，非 A-pose 的角色会遇到严重的网格粘连问题且身体结构严重畸变，而我们的 A-pose 角色可以成功动画化。"
+        },
+        {
+          "x": 51.81,
+          "y": 625.9,
+          "width": 154.89,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "5 限制与讨论"
+        },
+        {
+          "x": 51.38,
+          "y": 640.81,
+          "width": 242.67,
+          "height": 52.83,
+          "fontSize": 9.06,
+          "text": "尽管我们的方法可以从单张任意姿势的输入图像生成 3D 角色，但仍存在若干限制。在用于生成四视图 A-pose 图像的步骤中，当角色处于极端姿势或从非典型视角渲染时，我们的方法可能无法保留足够的信息。"
+        },
+        {
+          "x": 405.74,
+          "y": 271.27,
+          "width": 89.65,
+          "height": 8.92,
+          "fontSize": 8.0,
+          "text": "A-pose 角色动画"
+        },
+        {
+          "x": 394.9,
+          "y": 77.79,
+          "width": 105.63,
+          "height": 8.92,
+          "fontSize": 8.0,
+          "text": "非 A-pose 角色动画"
+        },
+        {
+          "x": 317.95,
+          "y": 293.18,
+          "width": 243.57,
+          "height": 17.94,
+          "fontSize": 8.0,
+          "text": "图11. 我们将 CharacterGen 的动画化 3D 角色与 ImageDream [Wang and Shi 2023] 进行比较。"
+        },
+        {
+          "x": 317.95,
+          "y": 337.77,
+          "width": 247.25,
+          "height": 63.69,
+          "fontSize": 9.06,
+          "text": "关于未来工作，将额外的非写实渲染（NPR）技术整合进纹理细化阶段，可能进一步提升生成角色的纹理质量。此外，利用我们训练好的多视图 UNet 结构，可能将 SDS 优化方法结合进来，以实现几何质量更优的 3D 角色生成。"
+        },
+        {
+          "x": 317.95,
+          "y": 413.18,
+          "width": 82.2,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "6 结论"
+        },
+        {
+          "x": 317.69,
+          "y": 428.05,
+          "width": 244.02,
+          "height": 118.63,
+          "fontSize": 9.06,
+          "text": "本文提出 CharacterGen，一种新颖且高效的图像提示 3D 角色生成框架。我们整理了一个新的多姿态风格化角色数据集 Anime3D 来训练管线。我们的设计包括 IDUNet，用以从输入条件图像中提取补丁级特征，以引导多视图 A-pose 角色图像生成。随后，我们采用基于 transformer 的网络来重建 3D 角色网格，并提出使用纹理反向投影（texture back-projection）细化策略来进一步改善重建角色网格的外观。实验证明 CharacterGen 能高效生成适用于多种下游应用的高质量 3D 角色。"
+        },
+        {
+          "x": 317.95,
+          "y": 558.4,
+          "width": 100.16,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "致谢"
+        },
+        {
+          "x": 317.62,
+          "y": 573.27,
+          "width": 244.09,
+          "height": 63.83,
+          "fontSize": 9.06,
+          "text": "本工作由国家重点研发计划（2021ZD0112902）、国家自然科学基金（项目号 62220106003）以及清华-腾讯互联网创新技术联合实验室资助。作者感谢 Ralph R. Martin、Yuan-Chen Guo 和 Yang-Guang Li 的有益讨论。"
+        },
+        {
+          "x": 317.95,
+          "y": 648.82,
+          "width": 57.36,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "参考文献"
+        },
+        {
+          "x": 317.95,
+          "y": 662.24,
+          "width": 243.32,
+          "height": 30.94,
+          "fontSize": 8.0,
+          "text": "actorcore. 2023. AccuRig，一款用于自动角色绑定的软件。https://actorcore.reallusion.com/auto-rig/accurig Thiemo Alldieck, Hongyi Xu, and Cristian Sminchisescu. 2021. imGHUM: Implicit Generative Models of 3D Human Shape and Articulated Pose. In 2021 IEEE/CVF"
+        },
+        {
+          "x": 351.5,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., Vol. 43, No. 4, Article 84. 出版日期：2024年7月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:18:42",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "13": {
+      "paperId": "ccdd970e-c8a3-45cb-9846-3c3508355aa4",
+      "page": 13,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 215.81,
+          "y": 55.89,
+          "width": 344.38,
+          "height": 6.97,
+          "fontSize": 8.0,
+          "text": "CharacterGen：基于单图像的多视角姿态标准化高效3D角色生成 • 84:13"
+        },
+        {
+          "x": 51.81,
+          "y": 83.45,
+          "width": 243.42,
+          "height": 604.73,
+          "fontSize": 8.0,
+          "text": "Patrick Pérez、Michel Gangnet 和 Andrew Blake。2003。《泊松图像编辑》。ACM Trans. Graph. 22, 3 (2003), 313–318。https://doi.org/10.1145/882262.882269 Pixiv。2019。three.js 的 VRM 工具。https://github.com/pixiv/three-vrm Ben Poole, Ajay Jain, Jonathan T. Barron, 和 Ben Mildenhall。2023。DreamFusion：使用 2D 扩散的文本到 3D。In The Eleventh International Conference on Learning Representations, ICLR 2023, Kigali, Rwanda, May 1-5, 2023。OpenReview.net。https://openreview.net/pdf?id=FjNys5c7VyY Guocheng Qian, Jinjie Mai, Abdullah Hamdi, Jian Ren, Aliaksandr Siarohin, Bing Li, Hsin-Ying Lee, Ivan Skorokhodov, Peter Wonka, Sergey Tulyakov, 和 Bernard Ghanem。2023。Magic123：利用 2D 和 3D 扩散先验从单张图像生成高质量 3D 物体。CoRR abs/2306.17843 (2023)。https://doi.org/10.48550/ARXIV.2306.17843 arXiv:2306.17843 Amit Raj, Srinivas Kaza, Ben Poole, Michael Niemeyer, Nataniel Ruiz, Ben Mildenhall, Shiran Zada, Kfir Aberman, Michael Rubinstein, Jonathan T. Barron, Yuanzhen Li, 和 Varun Jampani。2023。DreamBooth3D：以主题为驱动的文本到 3D 生成。In IEEE/CVF International Conference on Computer Vision, ICCV 2023, Paris, France, October 1-6, 2023。IEEE, 2349–2359。https://doi.org/10.1109/ICCV51070.2023.00223 Nataniel Ruiz, Yuanzhen Li, Varun Jampani, Yael Pritch, Michael Rubinstein, 和 Kfir Aberman。2023。DreamBooth：针对主题驱动生成对文本到图像扩散模型的微调。In IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR 2023, Vancouver, BC, Canada, June 17-24, 2023。IEEE, 22500–22510。https://doi.org/10.1109/CVPR52729.2023.02155 Shunsuke Saito, Zeng Huang, Ryota Natsume, Shigeo Morishima, Hao Li, 和 Angjoo Kanazawa。2019。PIFu：基于像素对齐隐式函数的高分辨率服装人体数字化。In 2019 IEEE/CVF International Conference on Computer Vision, ICCV 2019, Seoul, Korea (South), October 27 - November 2, 2019。IEEE, 2304–2314。https://doi.org/10.1109/ICCV.2019.00239 Shunsuke Saito, Tomas Simon, Jason M. Saragih, 和 Hanbyul Joo。2020。PIFuHD：多层次像素对齐隐式函数用于高分辨率 3D 人体数字化。In 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR 2020, Seattle, WA, USA, June 13-19, 2020。Computer Vision Foundation / IEEE, 81–90。https://doi.org/10.1109/CVPR42600.2020.00016 Tianchang Shen, Jun Gao, Kangxue Yin, Ming-Yu Liu, 和 Sanja Fidler。2021。Deep Marching Tetrahedra：用于高分辨率 3D 形状合成的混合表示。In Advances in Neural Information Processing Systems 34: Annual Conference on Neural Information Processing Systems 2021, NeurIPS 2021, December 6-14, 2021, virtual, 编辑：Marc’Aurelio Ranzato, Alina Beygelzimer, Yann N. Dauphin, Percy Liang, 和 Jennifer Wortman Vaughan。6087–6101。https://proceedings.neurips.cc/paper/2021/hash/30a237d18c50f563cba4531f1db44acf-Abstract.html Ruoxi Shi, Hansheng Chen, Zhuoyang Zhang, Minghua Liu, Chao Xu, Xinyue Wei, Linghao Chen, Chong Zeng, 和 Hao Su。2023a。Zero123++：单图像到一致多视角的扩散基础模型。CoRR abs/2310.15110 (2023)。https://doi.org/10.48550/ARXIV.2310.15110 arXiv:2310.15110 Yichun Shi, Peng Wang, Jianglong Ye, Mai Long, Kejie Li, 和 Xiao Yang。2023b。MVDream：用于 3D 生成的多视角扩散。CoRR abs/2308.16512 (2023)。https://doi.org/10.48550/ARXIV.2308.16512 arXiv:2308.16512 Junshu Tang, Tengfei Wang, Bo Zhang, Ting Zhang, Ran Yi, Lizhuang Ma, 和 Dong Chen。2023a。Make-It-3D：结合扩散先验从单张图像创建高保真 3D。In IEEE/CVF International Conference on Computer Vision, ICCV 2019, Seoul, Korea (South), October 27 - November 2, 2019。IEEE, 2304–2314。 Shunsuke Saito, Tomas Simon, Jason M. Saragih, and Hanbyul Joo。2020。PIFuHD：Multi-Level Pixel-Aligned Implicit Function for High-Resolution 3D Human Digitization。IEEE CVPR 2020。 Shunsuke Saito, Tomas Simon, Jason M. Saragih, and Hanbyul Joo。2020。PIFuHD：多层次像素对齐隐式函数用于高分辨率 3D 人体数字化。In 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR 2020, Seattle, WA, USA, June 13-19, 2020。Computer Vision Foundation / IEEE, 81–90。https://doi.org/10.1109/CVPR42600.2020.00016 Note: 上两条为原文重复项（OCR 原稿重复）已在此处保留以忠实反映页面内容。 Shunshu Tang, Fengjie Wang, Zhiqiang Shan, 等。页面列出其他参考文献（因页面 OCR 密集且部分条目在本段后续延续），请参见下一页以获取完整参考条目。"
+        },
+        {
+          "x": 317.95,
+          "y": 83.43,
+          "width": 243.42,
+          "height": 580.83,
+          "fontSize": 8.0,
+          "text": "e41e164f7485ec4a28741a2d0ea41c74-Abstract.html Peng Wang 和 Yichun Shi。2023。ImageDream：图像提示多视角扩散用于 3D 生成。CoRR abs/2312.02201 (2023)。https://doi.org/10.48550/ARXIV.2312.02201 arXiv:2312.02201 Tengfei Wang, Bo Zhang, Ting Zhang, Shuyang Gu, Jianmin Bao, Tadas Baltrusaitis, Jingjing Shen, Dong Chen, Fang Wen, Qifeng Chen, 和 Baining Guo。2023c。RODIN：一种用于使用扩散雕刻 3D 数字头像的生成模型。In IEEE/CVF Conference on Computer Vision and Pattern Recognition, CVPR 2023, Vancouver, BC, Canada, June 17-24, 2023。IEEE, 4563–4573。https://doi.org/10.1109/CVPR52729.2023.00443 Zhengyi Wang, Cheng Lu, Yikai Wang, Fan Bao, Chongxuan Li, Hang Su, 和 Jun Zhu。2023。Zero123：ProfileDreamer：一种面向单图像的一致多视角扩散基础模型（Zero123/Prompt Multi-View Diffusion）。CoRR abs/2312.02201 (2023)。https://doi.org/10.48550/ARXIV.2312.02201 arXiv:2312.02201 Chao-Wen, Yinda Zhang, Chenjie Cao, Zhubin Li, 等。页面上列出多篇与多视角、扩散模型及 3D 生成相关的工作，包括 Magic123、DreamBooth、MVDiffusion、MVDream 等。 Peng Wang, Yichun Shi, 等。页面继续列出大量参考文献并包含相应 DOI/URL（例如 https://proceedings.neurips.cc/paper/2021/hash/e41e164f7485ec4a28741a2d0ea41c74-Abstract.html）。 此外，页面列出： - Wang 等。2023。Score Jacobian Chaining：将预训练的 2D 扩散模型提升用于 3D 生成。CVPR 2023, 12619–12629。https://doi.org/10.1109/CVPR52729.2023.01214 - Nanyang Wang 等。2023b。Pixel2Mesh：通过图像引导变形生成 3D 网格模型。IEEE Trans. Pattern Anal. Mach. Intell. 43, 10 (2021), 3600–3613。https://doi.org/10.1109/TPAMI.2020.2984232 - Peng Wang 等。2021a。NeuS：通过体渲染学习神经隐式曲面用于多视角重建。NeurIPS 2021。https://proceedings.neurips.cc/paper/2021/hash/e41e164f7485ec4a28741a2d0ea41c74-Abstract.html - 其他条目包括：ImageDream、RODIN、ProlificDreamer、Pixel2Mesh++、Multiview Compressive Coding、OmniObject3D、ECON/ICON、IP-Adapter、DreamSparse、LION、3DShape2VecSet、AvatarVerse、AvatarStudio、添加条件控制到文本到图像扩散模型等多篇近年工作。 （注：该页参考文献丰富且为两页跨列排版；为保持对原页内容的忠实呈现，此处摘录并更正了若干 URL/DOI 的断行与拼写错误，完整索引请见论文参考文献部分原文。）"
+        },
+        {
+          "x": 351.5,
+          "y": 710.08,
+          "width": 208.69,
+          "height": 6.98,
+          "fontSize": 8.0,
+          "text": "ACM Trans. Graph., 第 43 卷，第 4 期，文章 84。发布日期：2024 年 7 月。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:19:24",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    }
+  },
+  "aiModel": "gpt-5-mini",
+  "aiProvider": "openai",
+  "translationMode": "vision",
+  "updatedAt": "2026-03-11T19:19:24"
+}

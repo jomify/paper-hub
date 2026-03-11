@@ -1,0 +1,1861 @@
+{
+  "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+  "pages": {
+    "1": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 1,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.43,
+          "y": 80.5,
+          "width": 395.15,
+          "height": 57.06,
+          "fontSize": 17.22,
+          "text": ""
+        },
+        {
+          "x": 113.98,
+          "y": 153.24,
+          "width": 169.91,
+          "height": 13.58,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 113.98,
+          "y": 167.26,
+          "width": 213.2,
+          "height": 29.42,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 278.29,
+          "y": 207.96,
+          "width": 55.43,
+          "height": 11.96,
+          "fontSize": 11.96,
+          "text": ""
+        },
+        {
+          "x": 143.87,
+          "y": 233.04,
+          "width": 324.27,
+          "height": 130.51,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.3,
+          "y": 385.15,
+          "width": 97.69,
+          "height": 11.95,
+          "fontSize": 11.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 526.37,
+          "width": 396.0,
+          "height": 42.84,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 584.82,
+          "width": 396.0,
+          "height": 86.68,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 678.47,
+          "width": 396.0,
+          "height": 53.8,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 10.94,
+          "y": 204.48,
+          "width": 26.68,
+          "height": 355.52,
+          "fontSize": 20.0,
+          "text": ""
+        }
+      ],
+      "translatedAt": "2026-03-11T18:52:17",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "2": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 2,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 84.27,
+          "width": 396.0,
+          "height": 119.55,
+          "fontSize": 9.96,
+          "text": "诸如真实三维模型 (Choy et al., 2016; Fan et al., 2017; Wang et al., 2018)、多视图图像 (Yan et al., 2016) 或对象的轮廓标注 (Yan et al., 2016; Kato et al., 2018; Kato et al., 2019) 等标注必须用于从二维图像重建三维形状。尽管这些方法通过独立控制对象身份和相机位姿实现了三维对象生成，但构建此类数据集需要大量时间和精力。因此，必须开发一种能够在没有任何标注信息的情况下学习三维表示的方法。尽管有些研究尝试解决该问题，但在应用于自然图像时其性能仍然有限。Rezende et al. (2016) 提出了一种无监督单视图三维网格重建方法，但它只能应用于基元数据集。Henzler et al. (2019) 最近提出了在自然图像上进行无监督单视图体素重建的方法，但由于内存限制，分辨率受到限制。"
+        },
+        {
+          "x": 108.0,
+          "y": 210.79,
+          "width": 396.0,
+          "height": 163.39,
+          "fontSize": 9.96,
+          "text": "为实现无监督三维对象生成，我们采用了不同的方法，即 RGB–Depth (RGBD) 图像生成。RGBD 图像包含每个像素的颜色和深度信息。所提出的 RGBD 图像生成可以通过对最近发展的图像生成模型进行简单扩展来实现。我们提出了 RGBD 生成对抗网络 (RGBD-GAN)，该网络学习从自然 RGB 图像数据集中生成 RGBD 图像，而不需要任何标注信息，例如相机位姿和深度标注，或单个对象的多视图。所提出的模型对生成图像使用显式的三维一致性损失；模型生成两个具有不同相机参数的 RGBD 图像，并学习使它们在三维世界中保持一致。该训练流程简单但对在无监督情况下生成深度图像以及将相机位姿与图像内容解耦非常有效。由于所提出的模型不限制生成器架构，我们可以将任意类型的图像生成器（例如 PG-GAN (Karras et al., 2018)、StyleGAN (Karras et al., 2019)）以相机参数为条件。图 1 显示了所提出模型的生成结果。因此，我们的模型可以在没有任何监督的情况下从任意视点生成 RGBD 图像，因此我们将此视为“无监督三维表示学习”，尽管单一输出无法表示完整的三维场景。"
+        },
+        {
+          "x": 108.0,
+          "y": 381.16,
+          "width": 130.43,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "我们的贡献如下。"
+        },
+        {
+          "x": 133.9,
+          "y": 402.8,
+          "width": 370.1,
+          "height": 32.05,
+          "fontSize": 9.96,
+          "text": "• 我们提出了一种新的图像生成技术，即 RGBD 图像生成，该方法可以仅从 RGB 图像在没有任何标注信息（例如相机参数、深度或单个对象的多视图）情况下实现。"
+        },
+        {
+          "x": 133.9,
+          "y": 441.44,
+          "width": 370.1,
+          "height": 21.09,
+          "fontSize": 9.96,
+          "text": "• 所提出的方法可以在无监督的情况下将相机参数与图像内容解耦。"
+        },
+        {
+          "x": 133.9,
+          "y": 469.12,
+          "width": 370.1,
+          "height": 21.09,
+          "fontSize": 9.96,
+          "text": "• 由于所提出的损失函数不限制生成器架构，我们的方法可以用于将任何类型的生成器以相机参数为条件。"
+        },
+        {
+          "x": 108.3,
+          "y": 509.63,
+          "width": 106.55,
+          "height": 11.96,
+          "fontSize": 11.96,
+          "text": "2 相关工作"
+        },
+        {
+          "x": 108.0,
+          "y": 536.0,
+          "width": 396.0,
+          "height": 196.27,
+          "fontSize": 9.96,
+          "text": "近年来，图像生成模型取得了显著进展，尤其是生成对抗网络 (GANs) (Goodfellow et al., 2014)。GAN 训练一个判别器来估计生成图像和真实图像之间的分布距离；同时训练一个生成器以最小化该估计距离。因而，训练图像的分布可以在无监督下被精确估计。近期对生成模型的关注主要集中在训练稳定性 (Arjovsky et al., 2017; Gulrajani et al., 2017; Miyato et al., 2018) 以及质量和多样性的提升 (Karras et al., 2018; Brock et al., 2019; Karras et al., 2019)。此外，也有方法提出从二维图像学习可变形的三维生成模型 (Tran et al., 2017; Shen et al., 2018; Sitzmann et al., 2019; Nguyen-Phuoc et al., 2019)。Tran et al. (2017) 和 Shen et al. (2018) 利用相机位姿标注或从多个视点拍摄的图像学习通过控制相机位姿来生成图像。尽管这些方法可以成功地控制对象位姿，但由于标注成本，其可扩展性受到限制。Nguyen-Phuoc et al. (2019) 最近提出了一种无需任何标注即可将对象身份与相机位姿解耦的方法。该方法使用潜在的三维特征，并学习从经过刚体变换后由三维特征投影得到的特征生成图像。也就是说，该方法关于三维世界使用了强烈的归纳偏置来学习相机位姿与图像之间的关系。这些图像生成模型无法输出显式的三维表示，从而限制了输出的可理解性。Sitzmann et al. (2019) 无监督地从 2D 图像数据集中学习，实现了 RGB 和深度图像的合成。"
+        }
+      ],
+      "translatedAt": "2026-03-11T18:53:47",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "3": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 3,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 84.27,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "使用从 3D 潜在特征到 2D 的考虑遮挡的投影。然而，该模型需要对单个物体的多个视点和相机位姿注释，因此限制了可扩展性。"
+        },
+        {
+          "x": 108.0,
+          "y": 112.16,
+          "width": 396.0,
+          "height": 42.84,
+          "fontSize": 9.96,
+          "text": "类似地，Rajeswar et al. (2019) 提出了一种在无标签 RGB 图像上训练的深度图像生成器。该模型可以在无监督下控制生成图像的位姿。然而，它仅在合成数据集上有效，在该数据集中每个像素的表面法线可以通过颜色和位置轻易估计。"
+        },
+        {
+          "x": 108.3,
+          "y": 172.39,
+          "width": 64.51,
+          "height": 11.95,
+          "fontSize": 11.96,
+          "text": "3 方法"
+        },
+        {
+          "x": 108.0,
+          "y": 197.52,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "在本研究中，通过 RGBD 图像合成实现无监督 3D 表示学习。本节中，我们首先在第 3.1 节说明使用 RGBD 表示的动机，并在第 3.2 节给出方法的详细说明。"
+        },
+        {
+          "x": 108.25,
+          "y": 244.41,
+          "width": 78.74,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "3.1 动机"
+        },
+        {
+          "x": 108.0,
+          "y": 264.93,
+          "width": 396.0,
+          "height": 64.76,
+          "fontSize": 9.96,
+          "text": "本研究的目标是构建一个可以根据相机参数 c 生成图像 I 的模型。然而，在没有任何标注的情况下完美建模 c 与 I 之间的关系是不可行的。因此，我们通过考虑光流一致性来缓解该问题。尽管光流通常用于电影中的两帧图像，我们在此将其用于由不同相机参数捕获的图像。光流一致性可表示为两幅图像之间的像素移动。"
+        },
+        {
+          "x": 188.43,
+          "y": 337.3,
+          "width": 315.57,
+          "height": 17.28,
+          "fontSize": 9.96,
+          "text": "I(x, y, c) = I(x + ∆x, y + ∆y, c + ∆c) 对于 ∀x, y, c (1)"
+        },
+        {
+          "x": 108.0,
+          "y": 355.2,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "这里，x 和 y 是图像中的像素坐标。考虑到小的 ∆c，该方程可以写成如下偏微分方程。"
+        },
+        {
+          "x": 216.52,
+          "y": 383.09,
+          "width": 25.16,
+          "height": 23.54,
+          "fontSize": 9.96,
+          "text": "∂I/∂x · dx/dc + ∂I/∂y · dy/dc + ∂I/∂c = 0 对于 ∀x, y, c (2)"
+        },
+        {
+          "x": 231.14,
+          "y": 383.09,
+          "width": 35.38,
+          "height": 23.54,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 256.25,
+          "y": 383.09,
+          "width": 49.05,
+          "height": 23.54,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 295.49,
+          "y": 389.58,
+          "width": 208.51,
+          "height": 17.29,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 109.19,
+          "y": 413.98,
+          "width": 41.79,
+          "height": 15.0,
+          "fontSize": 9.96,
+          "text": "∂I/∂x 和 ∂I/∂y 可由常规图像生成模型估计。因此，如果 dx/dc 和 dy/dc 已知，则可计算 ∂I/∂c。该项在优化 GAN 目标时有助于将生成器条件化到相机参数上。由于 dx/dc 和 dy/dc 是未知的，我们考虑对齐齐次坐标的几何约束。令 D 为深度，p = (x, y, 1) 为像素的齐次坐标，p_world 为像素在世界坐标系下的坐标，R 为旋转矩阵，t 为平移向量，K 为相机内参。相机参数 c 在此表示为 {K, R, t}。p_world 对 c 是常数。然后我们可以从世界坐标 p_world 计算图像上的位置和深度。"
+        },
+        {
+          "x": 142.66,
+          "y": 413.76,
+          "width": 327.19,
+          "height": 15.22,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 461.41,
+          "y": 413.24,
+          "width": 41.14,
+          "height": 15.74,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 421.12,
+          "width": 394.44,
+          "height": 18.98,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 430.13,
+          "width": 396.0,
+          "height": 23.69,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 373.86,
+          "y": 441.51,
+          "width": 40.15,
+          "height": 15.74,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 443.85,
+          "width": 396.0,
+          "height": 65.59,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 258.15,
+          "y": 516.22,
+          "width": 245.85,
+          "height": 17.28,
+          "fontSize": 9.96,
+          "text": "D p = K R p_world + K t (3)"
+        },
+        {
+          "x": 108.0,
+          "y": 534.91,
+          "width": 131.63,
+          "height": 11.79,
+          "fontSize": 9.96,
+          "text": "这有助于通过估计深度 D 来计算 dx/dc 和 dy/dc。因此，我们使用 RGBD 表示来进行相机参数条件化。对于深度图 D，考虑到相机参数的变化，深度图像也存在与 RGB 图像类似的光流一致性。这有助于估计深度图 D。"
+        },
+        {
+          "x": 231.19,
+          "y": 534.39,
+          "width": 40.5,
+          "height": 15.74,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 536.57,
+          "width": 396.0,
+          "height": 50.16,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 171.41,
+          "y": 587.18,
+          "width": 332.59,
+          "height": 17.29,
+          "fontSize": 9.96,
+          "text": "D(x, y, c) = D(x + ∆x, y + ∆y, c + ∆c) + ∆D 对于 ∀x, y, c (4)"
+        },
+        {
+          "x": 108.0,
+          "y": 604.92,
+          "width": 181.98,
+          "height": 17.28,
+          "fontSize": 9.96,
+          "text": "这里，∆D 可由式 (3) 计算得到。"
+        },
+        {
+          "x": 108.0,
+          "y": 620.42,
+          "width": 391.77,
+          "height": 11.56,
+          "fontSize": 9.96,
+          "text": "简而言之，使用式 (1)、(3) 和 (4) 约束训练 GAN 有利于学习 ∂I/∂c，从而有利于基于相机参数的条件合成。此外，学习基于相机参数的条件图像生成模型，在式 (1) 和 (3) 的约束下，有助于学习深度分布。下面解释各模块的细节。"
+        },
+        {
+          "x": 108.0,
+          "y": 622.02,
+          "width": 396.0,
+          "height": 42.84,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.25,
+          "y": 679.87,
+          "width": 109.85,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "3.2 提出的方法流程"
+        },
+        {
+          "x": 108.0,
+          "y": 700.39,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "所提出的模型由三部分组成：基于相机参数条件化的 RGBD 图像生成器、用于对抗训练的 RGB 图像判别器，以及自监督的 RGBD 一致性损失。管线概览见图 2。"
+        }
+      ],
+      "translatedAt": "2026-03-11T18:56:03",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "4": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 4,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 的会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 215.27,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "图2：提出的流程。我们使用自监督的3D一致性损失和针对RGB通道的对抗损失训练RGBD图像生成器。模型生成两个具有不同相机参数的RGBD图像，并学习使它们与3D世界保持一致。"
+        },
+        {
+          "x": 108.25,
+          "y": 273.88,
+          "width": 146.45,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "3.2.1 RGBD 图像生成器"
+        },
+        {
+          "x": 108.0,
+          "y": 294.64,
+          "width": 396.0,
+          "height": 64.76,
+          "fontSize": 9.96,
+          "text": "考虑到图像生成的成功，GAN 的生成器能够估计复杂的分布。因此，我们使用了常见的 RGB 图像生成器（如 DCGAN（Radford et al., 2016）或 StyleGAN）来进行 RGBD 合成。RGBD 合成通过在 RGB 生成器的最终层增加一个通道来实现。此外，如实验部分所述，我们也可以使用基于 3D 潜在表示的图像生成模型，例如 HoloGAN（Nguyen-Phuoc et al., 2019）或 DeepVoxels（Sitzmann et al., 2019），它们可以更自然地建模 3D 世界。"
+        },
+        {
+          "x": 108.0,
+          "y": 366.37,
+          "width": 396.0,
+          "height": 42.84,
+          "fontSize": 9.96,
+          "text": "在所提出的流程中，生成器以相机参数为条件，并通过梯度下降训练以最小化下文所述的自监督一致性损失和对抗损失。由于对生成器架构没有限制，任何类型的生成器架构都可以用于 RGBD 图像合成，从而使我们的方法具有很高的适用性。"
+        },
+        {
+          "x": 108.25,
+          "y": 426.87,
+          "width": 228.83,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "3.2.2 自监督 RGBD 一致性损失"
+        },
+        {
+          "x": 108.0,
+          "y": 447.64,
+          "width": 396.0,
+          "height": 76.32,
+          "fontSize": 9.96,
+          "text": "在第3.1节中，我们表明 RGB 与深度的光流一致性可以促进以相机参数为条件的图像生成学习。我们通过采样两个相机参数 c1 和 c2，并最小化以这些相机参数为条件生成的两幅图像对应方程两边的差来近似方程1和方程4中的约束，其中 c = c1 且 c + Δc = c2。本研究中，相机参数按数据集从预定义分布 p(c) 中采样，类似于 HoloGAN。详细设置在第4.2节和附录中说明。我们将 Δc 的最大值限制为 30° 以避免较大遮挡。"
+        },
+        {
+          "x": 108.0,
+          "y": 530.33,
+          "width": 396.0,
+          "height": 86.67,
+          "fontSize": 9.96,
+          "text": "方程1的目标函数类似于单目视频深度估计中使用的损失（Zhou et al., 2017）。利用方程3，我们可以在从不同视点观察 RGBD 图像时计算每个像素的3D位置。因此，可以通过从以 c2 拍摄的 RGBD 图像中采样像素值来渲染以 c1 拍摄的图像。此操作通常称为“warp”操作，并通过双线性采样实现。我们将该损失应用于以 c1 和 c2 为条件生成的 RGBD 图像。深度估计（Zhou et al., 2017）与所提出方法的主要区别在于，我们的方法同时优化 RGB 和深度图像生成器，而深度估计仅优化深度估计器。"
+        },
+        {
+          "x": 108.0,
+          "y": 623.98,
+          "width": 396.0,
+          "height": 42.83,
+          "fontSize": 9.96,
+          "text": "此外，对于方程4中深度图的约束，我们对生成的深度图定义了一致性损失。该损失类似于（Godard et al., 2017）中的左右视差一致性损失，旨在使从 c1 生成的深度图在3D空间上与从 c2 生成的深度图相等。整体提出的3D损失函数可写为方程5。"
+        },
+        {
+          "x": 145.73,
+          "y": 682.54,
+          "width": 98.35,
+          "height": 19.53,
+          "fontSize": 9.96,
+          "text": "L_{3D} = E_{z ∼ p(z), c1, c2 ∼ p(c)}["
+        },
+        {
+          "x": 246.24,
+          "y": 677.83,
+          "width": 218.34,
+          "height": 31.07,
+          "fontSize": 9.96,
+          "text": "1/(3HW) || G_{RGB}(z, c1) − warp(G_{RGB}(z, c2), c1→2) ||_1"
+        },
+        {
+          "x": 195.14,
+          "y": 706.19,
+          "width": 265.38,
+          "height": 30.61,
+          "fontSize": 9.96,
+          "text": "+ 1/(HW) || projection(G_{D}(z, c1), c1→2) − warp(G_{D}(z, c2), c1→2) ||_1 ] (5)"
+        }
+      ],
+      "translatedAt": "2026-03-11T18:57:04",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "5": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 5,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为会议论文发表于 ICLR 2020"
+        },
+        {
+          "x": 108.0,
+          "y": 84.27,
+          "width": 396.0,
+          "height": 64.76,
+          "fontSize": 9.96,
+          "text": "这里，G_RGB(z, c) 和 G_D(z, c) 分别表示由潜在向量 z 和相机参数 c 生成的 RGB 图像和深度图，W 和 H 分别表示图像的宽度和高度，c_{1→2} 是从 c1 到 c2 的相对变换矩阵。“projection”（投影）操作使用式 (3) 从输入深度图计算从不同视点观察到的深度值。为简化起见，我们在该式中省略了逆变换 c_{2→1} 的损失。有关“warp”和“projection”的详细说明见附录。"
+        },
+        {
+          "x": 108.0,
+          "y": 156.0,
+          "width": 396.0,
+          "height": 53.8,
+          "fontSize": 9.96,
+          "text": "该损失函数在 c_{1→2} 变换期间会对被遮挡像素产生不准确的梯度，因为它未考虑这些区域。因此，在本研究中，我们使用了 (Gordon et al., 2019) 中提出的技术。该技术仅向那些投影深度小于另一视点图像深度的像素传播梯度。这可以防止在投影过程中位于其他像素后面的像素产生不准确的梯度。"
+        },
+        {
+          "x": 108.0,
+          "y": 216.77,
+          "width": 396.0,
+          "height": 39.04,
+          "fontSize": 9.96,
+          "text": "最后，我们加入深度约束项以稳定训练。上述损失在生成的深度非常小的时候容易被最小化为 0。因此，我们将深度值的最小限制设为 D_min，并对小于 D_min 的深度值加入正则化。"
+        },
+        {
+          "x": 211.79,
+          "y": 252.76,
+          "width": 60.05,
+          "height": 23.78,
+          "fontSize": 9.96,
+          "text": "L_depth = 1/(HW)"
+        },
+        {
+          "x": 277.69,
+          "y": 256.51,
+          "width": 226.31,
+          "height": 23.66,
+          "fontSize": 9.96,
+          "text": "∑_{x,y} max(0, D_min − D(x,y))^2 (6)"
+        },
+        {
+          "x": 108.25,
+          "y": 291.38,
+          "width": 155.53,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "3.2.3 RGB 图像判别器"
+        },
+        {
+          "x": 108.0,
+          "y": 310.56,
+          "width": 396.0,
+          "height": 42.84,
+          "fontSize": 9.96,
+          "text": "为了从无标签 RGB 图像训练一个 RGBD 生成器，我们仅对生成图像的 RGB 通道应用对抗损失。尽管该损失只能提升图像的真实性，但通过对式 (5) 中损失的优化，该损失有利于学习深度图像和相机参数的条件化。"
+        },
+        {
+          "x": 108.0,
+          "y": 360.21,
+          "width": 292.91,
+          "height": 17.28,
+          "fontSize": 9.96,
+          "text": "基于上述，生成器的最终目标 L_G 如下。"
+        },
+        {
+          "x": 223.0,
+          "y": 375.58,
+          "width": 281.0,
+          "height": 17.29,
+          "fontSize": 9.96,
+          "text": "L_G = L_GAN + λ_{3D} L_{3D} + λ_{depth} L_{depth} (7)"
+        },
+        {
+          "x": 108.0,
+          "y": 390.96,
+          "width": 341.96,
+          "height": 17.28,
+          "fontSize": 9.96,
+          "text": "其中，L_GAN 是对抗损失函数，λ_{3D} 和 λ_{depth} 是超参数。"
+        },
+        {
+          "x": 108.3,
+          "y": 418.04,
+          "width": 91.78,
+          "height": 11.96,
+          "fontSize": 11.96,
+          "text": "4 实验"
+        },
+        {
+          "x": 108.25,
+          "y": 442.75,
+          "width": 129.96,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "4.1 模型架构"
+        },
+        {
+          "x": 108.0,
+          "y": 463.28,
+          "width": 396.0,
+          "height": 75.71,
+          "fontSize": 9.96,
+          "text": "所提方法并不限制生成器架构：任何类型的图像生成器都可以以相机参数为条件。为证明本方法的有效性，我们测试了三种图像生成模型：PGGAN、StyleGAN 和 DeepVoxels。模型架构如图 3 所示。由于从单张图像中很难获取透视信息，在本实验中相机内参 K 在训练期间保持固定。我们仅控制方位角 θ_a（左右旋转）和仰角 θ_e（上下旋转）参数，基于 HoloGAN 的训练设置。下面我们给出每种模型架构的细节。"
+        },
+        {
+          "x": 108.0,
+          "y": 545.88,
+          "width": 396.0,
+          "height": 72.0,
+          "fontSize": 9.96,
+          "text": "PGGAN：PGGAN (Karras et al., 2018) 是一种最先进的 DCGAN。在本实验中，我们将模型以两个相机参数（方位角和仰角）为条件，方法如下：首先，这些值分别输入到 cos 和 sin 函数，输出被拼接成一个四维向量 c_cyclic。随后，c_cyclic 与潜在向量 z 拼接，作为生成器的输入。该操作使得生成图像可以随 360° 角度连续变化。我们从分辨率 32×32 开始，并逐步增加到 128×128。"
+        },
+        {
+          "x": 108.0,
+          "y": 617.61,
+          "width": 396.0,
+          "height": 75.81,
+          "fontSize": 9.96,
+          "text": "StyleGAN：StyleGAN (Karras et al., 2019) 是一种最先进的 GAN 模型，通过自适应实例归一化（AdaIN）（Huang & Belongie, 2017）来控制每个卷积层的输出“风格”，并获得分层潜在表示。我们使用 c_cyclic 仅控制 4×4 和 8×8 分辨率处特征的风格，因为已知低分辨率层的风格控制全局特征如姿态和形状。更具体地，我们将 c_cyclic 与映射网络的输出 w 拼接，然后通过多层感知机将其转换为 w'。请参见图 3。图像分辨率与 PGGAN 相同。"
+        },
+        {
+          "x": 108.0,
+          "y": 700.3,
+          "width": 396.0,
+          "height": 31.97,
+          "fontSize": 9.96,
+          "text": "DeepVoxels：HoloGAN 通过使用 3D 潜在特征表示实现了相机参数的解耦。这比上述两种模型更自然地建模 3D 世界，因为它考虑了在 3D 空间中的显式变换。然而，HoloGAN 无法考虑深度。"
+        }
+      ],
+      "translatedAt": "2026-03-11T18:58:08",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "6": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 6,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 会议论文发表"
+        },
+        {
+          "x": 127.3,
+          "y": 199.22,
+          "width": 322.22,
+          "height": 9.54,
+          "fontSize": 8.0,
+          "text": "基于 PGGAN，基于 StyleGAN，基于 DeepVoxels"
+        },
+        {
+          "x": 363.07,
+          "y": 158.75,
+          "width": 24.24,
+          "height": 11.5,
+          "fontSize": 8.0,
+          "text": "3D 卷积 DeepVoxels"
+        },
+        {
+          "x": 365.06,
+          "y": 169.58,
+          "width": 20.38,
+          "height": 6.3,
+          "fontSize": 8.0,
+          "text": "生成器"
+        },
+        {
+          "x": 418.57,
+          "y": 103.3,
+          "width": 12.25,
+          "height": 7.59,
+          "fontSize": 8.0,
+          "text": "R, t"
+        },
+        {
+          "x": 408.53,
+          "y": 114.09,
+          "width": 24.18,
+          "height": 13.75,
+          "fontSize": 8.0,
+          "text": "相机投影"
+        },
+        {
+          "x": 471.18,
+          "y": 134.2,
+          "width": 21.47,
+          "height": 6.2,
+          "fontSize": 8.0,
+          "text": "渲染"
+        },
+        {
+          "x": 328.04,
+          "y": 139.65,
+          "width": 162.64,
+          "height": 8.15,
+          "fontSize": 8.0,
+          "text": "DeepVoxels 网络"
+        },
+        {
+          "x": 245.54,
+          "y": 124.87,
+          "width": 15.31,
+          "height": 7.39,
+          "fontSize": 8.0,
+          "text": "AdaIN"
+        },
+        {
+          "x": 449.94,
+          "y": 90.19,
+          "width": 17.0,
+          "height": 13.67,
+          "fontSize": 8.0,
+          "text": "图像特征"
+        },
+        {
+          "x": 145.98,
+          "y": 180.83,
+          "width": 22.98,
+          "height": 7.05,
+          "fontSize": 8.0,
+          "text": "cos, sin"
+        },
+        {
+          "x": 149.53,
+          "y": 190.66,
+          "width": 15.91,
+          "height": 7.58,
+          "fontSize": 8.0,
+          "text": "θ_a, θ_e"
+        },
+        {
+          "x": 148.64,
+          "y": 169.19,
+          "width": 17.54,
+          "height": 7.58,
+          "fontSize": 8.0,
+          "text": "c（循环）"
+        },
+        {
+          "x": 195.1,
+          "y": 144.78,
+          "width": 44.76,
+          "height": 7.39,
+          "fontSize": 8.0,
+          "text": "z → w"
+        },
+        {
+          "x": 196.2,
+          "y": 170.82,
+          "width": 44.73,
+          "height": 9.83,
+          "fontSize": 8.0,
+          "text": "cos, sin"
+        },
+        {
+          "x": 199.91,
+          "y": 183.56,
+          "width": 16.62,
+          "height": 7.95,
+          "fontSize": 8.0,
+          "text": "θ_a, θ_e"
+        },
+        {
+          "x": 198.98,
+          "y": 161.27,
+          "width": 18.31,
+          "height": 7.94,
+          "fontSize": 8.0,
+          "text": "c（循环）"
+        },
+        {
+          "x": 108.0,
+          "y": 229.98,
+          "width": 396.0,
+          "height": 20.93,
+          "fontSize": 9.96,
+          "text": "图 3：测试的生成器架构。基于 PGGAN 的模型（左）、基于 StyleGAN 的模型（中）、以及基于 DeepVoxels 的模型（右）。"
+        },
+        {
+          "x": 108.0,
+          "y": 275.67,
+          "width": 396.0,
+          "height": 207.22,
+          "fontSize": 9.96,
+          "text": "由于 HoloGAN 的投影单元仅在深度维度上计算特征的加权和，因此我们改用受 DeepVoxels（Sitzmann et al., 2019）启发的模型来应用所提出的方法。DeepVoxels 是一种能够使用单个物体的多视点图像学习对象的 3D 潜在体素表示并生成新视角图像的方法。该方法使用感知遮挡的投影模块来学习沿深度轴从相机视角可见的体素，这通过无监督学习实现。因此可以从模型中获取深度图，这使其适合与我们的方法结合。在本实验中，我们将 DeepVoxels 与一个从随机潜在向量 z 生成特征的体素特征生成器结合，用于随机图像生成任务。我们对体素特征生成器使用了 3D 卷积和 AdaIN，类似于 HoloGAN。DeepVoxels 使用显式的相机模型来获取相机视锥（frustum）内可见的特征，而 HoloGAN 使用刚体变换。因此 DeepVoxels 能更准确地推理 3D 世界。我们比较了三种使用 3D 特征表示的模型设置。第一种模型在深度维度上使用加权和替代感知遮挡的投影模块，类似于 HoloGAN。第二种模型使用感知遮挡投影模块但不使用所提出的 3D 损失。最终模型同时使用 DeepVoxels 和所提出的 3D 损失。在图和表中，这些方法分别被称为 “HoloGAN-like”、“DeepVoxels” 和 “DeepVoxels + 3D loss”。值得注意的是 “HoloGAN-like” 并非原始 HoloGAN 的相同模型，因为它基于 DeepVoxels 的网络结构。"
+        },
+        {
+          "x": 108.25,
+          "y": 499.68,
+          "width": 67.55,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "4.2 数据集"
+        },
+        {
+          "x": 108.0,
+          "y": 520.91,
+          "width": 396.0,
+          "height": 86.67,
+          "fontSize": 9.96,
+          "text": "我们在 FFHQ (Karras et al., 2019)、ShapeNet 的汽车（Chang et al., 2015）、车图像集（Krause et al., 2013）和 LSUN 卧室数据集（Yu et al., 2015）上训练模型。对于 PGGAN 和 StyleGAN，我们使用 128 × 128 的图像；出于内存限制，使用 3D 潜在特征表示的模型使用 64 × 64 的图像。我们在所有实验中将仰角范围设为 35°，FFHQ 和卧室数据集的方位角范围为 120°，Car 与 ShapeNet 汽车数据集的方位角范围为 360°。对于 ShapeNet 汽车数据集和车图像数据集，我们为基于 DeepVoxels 的模型使用了一个新的遮挡推理算法以稳定训练，详细内容在附录中说明。"
+        },
+        {
+          "x": 108.25,
+          "y": 624.37,
+          "width": 62.0,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "4.3 结果"
+        },
+        {
+          "x": 108.0,
+          "y": 645.5,
+          "width": 396.0,
+          "height": 86.77,
+          "fontSize": 9.96,
+          "text": "定性结果：各模型在控制相机参数下的生成结果（针对 FFHQ 和 ShapeNet 汽车数据集）如图 4、5、10 与 11 所示。图中带有色谱的图片表示生成的深度图。深度先归一化（减去最小值并除以范围），然后用色谱可视化。对于所有使用所提出损失的模型（图中前三行），可以在保持身份信息的同时通过控制相机参数生成图像。此外，模型还能生成训练样本中不存在的深度图。为验证深度一致性，我们为每个模型的生成结果展示了法线图（normal maps）和旋转后的图像，如图 6 所示。白色区域的"
+        }
+      ],
+      "translatedAt": "2026-03-11T18:59:30",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "7": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 7,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "发表于 ICLR 2020 会议论文"
+        },
+        {
+          "x": 108.0,
+          "y": 298.09,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "图4：在 FFHQ 数据集上各模型生成图像的对比可视化。每一行的图像均由相同的潜向量 z 生成，但具有不同的方位角或仰角。带色彩图的是生成的深度图像。"
+        },
+        {
+          "x": 109.89,
+          "y": 548.08,
+          "width": 396.01,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "图5：在 ShapeNet 汽车图像上各模型生成图像的对比可视化。每一行的图像均由相同的潜向量 z 生成，但具有不同的方位角或仰角。带色彩图的是生成的深度图像。"
+        },
+        {
+          "x": 108.0,
+          "y": 612.72,
+          "width": 396.0,
+          "height": 119.55,
+          "fontSize": 9.96,
+          "text": "ShapeNet 汽车数据集的点云可视化已省略。如图所示，模型可以在没有任何关于三维世界注释的情况下，生成人脸的凸状形状和汽车的矩形形状。特别地，尽管 PGGAN 和 StyleGAN 使用 2D CNN，仍能实现一致的旋转和深度估计，这在以往方法中是无法做到的。这表明所提出的方法在生成器架构上具有良好的泛化性能。基于 DeepVoxels 的方法结合所提出的损失，在 FFHQ 和 ShapeNet 汽车数据集上均表现良好。与基于 2D CNN 的模型相比，它们可以获得更一致的旋转并生成更一致的深度图像。这得益于显式的三维空间建模，不过这会消耗大量内存并带来较高的计算开销。在实验中，尽管基于 DeepVoxels 的模型输出图像的尺寸仅为基于 StyleGAN 的模型的一半，但它们在一次迭代中需要 2.5 倍的内存和 2.9 倍的计算时间。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:00:29",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "8": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 8,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 279.32,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 322.99,
+          "width": 396.0,
+          "height": 22.42,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 180.25,
+          "y": 359.76,
+          "width": 253.09,
+          "height": 82.64,
+          "fontSize": 8.0,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 480.21,
+          "width": 396.0,
+          "height": 64.76,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 551.95,
+          "width": 396.0,
+          "height": 119.55,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 678.47,
+          "width": 396.0,
+          "height": 53.8,
+          "fontSize": 9.96,
+          "text": ""
+        }
+      ],
+      "translatedAt": "2026-03-11T19:01:16",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "9": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 9,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 会议论文发表"
+        },
+        {
+          "x": 146.06,
+          "y": 263.95,
+          "width": 319.88,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "图7：通过改变方位角范围生成的汽车和卧室图像。"
+        },
+        {
+          "x": 108.0,
+          "y": 297.43,
+          "width": 396.0,
+          "height": 42.84,
+          "fontSize": 9.96,
+          "text": "因此，所提出的方法能够有效地帮助各种生成器同时学习深度信息并对相机位姿进行显式控制。这些是在不需要 HoloGAN 等方法所需的 3D 潜在表示的情况下实现的。此外，所提出的方法还进一步提升了使用 3D 潜在表示的模型的结果。"
+        },
+        {
+          "x": 108.0,
+          "y": 354.21,
+          "width": 396.0,
+          "height": 108.69,
+          "fontSize": 9.96,
+          "text": "RGB 图像的定量评估 我们比较了每种生成器架构在使用与不使用所提出方法时的 Fréchet inception distance (FID) (Heusel et al., 2017)。FID 是衡量生成 RGB 图像质量与多样性的典型评估指标。结果如表 1 所示。结果表明，所提出的相机参数条件图像生成模型在所有生成器架构类型下都能生成具有可比甚至更好 FID 的图像，相较于无条件或仅生成 RGB 的模型。值得注意的是，这一比较并不公平，因为不使用 3D 损失的模型仅被训练以最小化真实图像与生成图像外观之间的分布距离，而使用 3D 损失的模型则学习相机参数的条件约束。结果展示了我们方法对不同生成器架构的稳健性和有效性。"
+        },
+        {
+          "x": 108.0,
+          "y": 476.84,
+          "width": 396.0,
+          "height": 152.52,
+          "fontSize": 9.96,
+          "text": "RGBD 图像的定量评估 在 3D 空间中评估生成的 RGB 和深度是困难的，因为要获得生成图像的真实颜色或深度是不可能的。一种可能的方法是在无真实图像的情况下通过计算生成图像的 inception score (IS) (Salimans et al., 2016) 或 FID 来评估 RGBD 图像。然而，这并不合适，因为 IS 和 FID 是在预训练 CNN 的特征空间中估计的，它们无法考虑 3D 世界的几何结构。因此，无法在 3D 空间中对生成的 RGBD 进行评估。相反，我们评估了视图间的颜色和深度一致性，以定量比较不同方法生成的 RGBD 图像。对于由相同潜向量 z 但不同相机参数 c 生成的点云，所有点应位于 3D 空间的同一表面上。因此，通过计算不同视图下生成的 RGBD 的变化，可以定量评估 3D 一致性。我们在表 1 中计算了生成图像点云的方差，记为 V_depth 和 V_color。细节见附录。值得注意的是，这些值无法为不使用 3D 损失的 PGGAN 和 StyleGAN 以及类似 HoloGAN 的方法计算。"
+        },
+        {
+          "x": 108.0,
+          "y": 636.34,
+          "width": 396.0,
+          "height": 31.87,
+          "fontSize": 9.96,
+          "text": "结果表明，带 3D 损失的 DeepVoxels 取得了最佳分数，这归因于 3D 潜在表示的强烈归纳偏置。与不带 3D 损失的 DeepVoxels 相比，带 3D 损失的 DeepVoxels 生成了颜色和深度一致的结果，展示了所提损失的有效性。"
+        },
+        {
+          "x": 108.3,
+          "y": 685.97,
+          "width": 87.08,
+          "height": 11.96,
+          "fontSize": 11.96,
+          "text": "5 结论"
+        },
+        {
+          "x": 108.0,
+          "y": 711.35,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "我们在此提出了一种用于相机参数条件图像生成的 RGBD 图像合成技术。虽然所提出的方法不需要任何标注数据集，但它可以显式地控制相机位姿。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:02:14",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "10": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 10,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 的会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 84.27,
+          "width": 396.0,
+          "height": 53.8,
+          "fontSize": 9.96,
+          "text": "控制生成图像的相机参数并生成一致的深度图。该方法不限制生成器架构，可用于以相机参数为条件驱动任何类型的图像生成器。由于所提方法可以学习相机参数与图像之间的关系，未来工作将包括将该方法扩展到无监督相机位姿估计以及从图像中提取无监督的相机位姿不变特征。"
+        },
+        {
+          "x": 108.3,
+          "y": 155.58,
+          "width": 129.24,
+          "height": 11.96,
+          "fontSize": 11.96,
+          "text": "6 致谢"
+        },
+        {
+          "x": 108.0,
+          "y": 180.81,
+          "width": 396.0,
+          "height": 42.84,
+          "fontSize": 9.96,
+          "text": "本工作部分由 JST CREST（资助编号 JPMJCR1403）资助，部分由 JSPS KAKENHI（资助编号 JP19H01115）资助。我们感谢 Antonio Tejero de Pablos、Dexuan Zhang、Hiroaki Yamane、James Borg、Mikihiro Tanaka、Sho Maeoki、Shunya Wakasugi、Takayuki Hara、Takuhiro Kaneko 和 Toshihiko Matsuura 的有益讨论。"
+        },
+        {
+          "x": 108.3,
+          "y": 241.17,
+          "width": 66.96,
+          "height": 11.95,
+          "fontSize": 11.96,
+          "text": "参考文献"
+        },
+        {
+          "x": 108.0,
+          "y": 260.37,
+          "width": 396.0,
+          "height": 20.97,
+          "fontSize": 9.96,
+          "text": "Martin Arjovsky、Soumith Chintala 和 Léon Bottou. Wasserstein 生成对抗网络. 发表在 ICML, 2017."
+        },
+        {
+          "x": 108.0,
+          "y": 290.48,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Andrew Brock、Jeff Donahue 和 Karen Simonyan. 大规模 GAN 训练以实现高保真自然图像合成. 发表在 ICLR, 2019."
+        },
+        {
+          "x": 108.0,
+          "y": 320.55,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "Angel X Chang、Thomas Funkhouser、Leonidas Guibas、Pat Hanrahan、Qixing Huang、Zimo Li、Silvio Savarese、Manolis Savva、Shuran Song、Hao Su 等. ShapeNet：一个信息丰富的 3D 模型库. arXiv 预印本 arXiv:1512.03012, 2015."
+        },
+        {
+          "x": 108.0,
+          "y": 361.57,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Christopher B Choy、Danfei Xu、JunYoung Gwak、Kevin Chen 和 Silvio Savarese. 3D-R2N2：一种单视图与多视图三维物体重建的统一方法. 发表在 ECCV，Springer, 2016."
+        },
+        {
+          "x": 108.0,
+          "y": 391.63,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Haoqiang Fan、Hao Su 和 Leonidas J Guibas. 用于从单张图像重建三维物体的点云生成网络. 发表在 CVPR, 2017."
+        },
+        {
+          "x": 108.0,
+          "y": 421.64,
+          "width": 396.0,
+          "height": 20.97,
+          "fontSize": 9.96,
+          "text": "Clément Godard、Oisin Mac Aodha 和 Gabriel J Brostow. 带有左右一致性的无监督单目深度估计. 发表在 CVPR, 2017."
+        },
+        {
+          "x": 108.0,
+          "y": 451.75,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Ian J Goodfellow、Jean Pouget-Abadie、Mehdi Mirza、Bing Xu、David Warde-Farley、Sherjil Ozair、Aaron Courville 和 Yoshua Bengio. 生成对抗网络. 发表在 NIPS, 2014."
+        },
+        {
+          "x": 108.0,
+          "y": 481.81,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Ariel Gordon、Hanhan Li、Rico Jonschkowski 和 Anelia Angelova. 来自自然场景视频的深度：从未知相机进行无监督单目深度学习. 发表在 ICCV, 2019."
+        },
+        {
+          "x": 108.0,
+          "y": 511.87,
+          "width": 396.0,
+          "height": 20.93,
+          "fontSize": 9.96,
+          "text": "Ishaan Gulrajani、Faruk Ahmed、Martin Arjovsky、Vincent Dumoulin 和 Aaron C Courville. Wasserstein GAN 的改进训练方法. 发表在 NIPS, 2017."
+        },
+        {
+          "x": 108.0,
+          "y": 541.94,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Philipp Henzler、Niloy J. Mitra 和 Tobias Ritschel. 走出柏拉图的洞穴：通过对抗渲染获得三维形状. 发表在 ICCV, 2019."
+        },
+        {
+          "x": 108.0,
+          "y": 572.0,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Martin Heusel、Hubert Ramsauer、Thomas Unterthiner、Bernhard Nessler 和 Sepp Hochreiter. 通过双时尺度更新规则训练的 GAN 收敛到局部纳什均衡. 发表在 NIPS, 2017."
+        },
+        {
+          "x": 108.0,
+          "y": 602.06,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Xun Huang 和 Serge J Belongie. 使用自适应实例归一化实现实时任意风格迁移. 发表在 ICCV, 2017."
+        },
+        {
+          "x": 108.0,
+          "y": 632.12,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Tero Karras、Timo Aila、Samuli Laine 和 Jaakko Lehtinen. 逐步生长的 GAN：提升质量、稳定性与多样性. 发表在 ICLR, 2018."
+        },
+        {
+          "x": 108.0,
+          "y": 662.18,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Tero Karras、Samuli Laine 和 Timo Aila. 基于风格的生成器架构用于生成对抗网络. 发表在 CVPR, 2019."
+        },
+        {
+          "x": 108.0,
+          "y": 692.24,
+          "width": 396.0,
+          "height": 20.93,
+          "fontSize": 9.96,
+          "text": "Hiroharu Kato 和 Tatsuya Harada. 学习视图先验用于单视图三维重建. 发表在 CVPR, 2019."
+        },
+        {
+          "x": 108.0,
+          "y": 722.13,
+          "width": 390.69,
+          "height": 10.14,
+          "fontSize": 9.96,
+          "text": "Hiroharu Kato、Yoshitaka Ushiku 和 Tatsuya Harada. 神经三维网格渲染器. 发表在 CVPR, 2018."
+        }
+      ],
+      "translatedAt": "2026-03-11T19:03:21",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "11": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 11,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为会议论文发表于 ICLR 2020"
+        },
+        {
+          "x": 108.0,
+          "y": 84.27,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "Jonathan Krause, Michael Stark, Jia Deng, and Li Fei-Fei. 3D 物体表示用于细粒度分类。发表于第四届国际 IEEE 3D 表示与识别研讨会 (3dRR-13)，澳大利亚悉尼，2013 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 123.57,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Lars Mescheder, Andreas Geiger, and Sebastian Nowozin. 哪些用于 GAN 的训练方法实际上会收敛？发表于 ICML，2018 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 151.92,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Takeru Miyato, Toshiki Kataoka, Masanori Koyama, and Yuichi Yoshida. 用于生成对抗网络的谱归一化。发表于 ICLR，2018 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 180.26,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Thu Nguyen-Phuoc, Chuan Li, Lucas Theis, Christian Richardt, and Yong-Liang Yang. HoloGAN：从自然图像无监督学习 3D 表示。2019 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 208.61,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Alec Radford, Luke Metz, and Soumith Chintala. 使用深度卷积生成对抗网络的无监督表示学习。发表于 ICLR，2016 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 236.95,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "Sai Rajeswar, Fahim Mannan, Florian Golemo, David Vazquez, Derek Nowrouzezahrai, and Aaron Courville. Pix2Scene：从图像学习隐式 3D 表示，2019 年。URL https://openreview.net/forum?id=BJeem3C9F7"
+        },
+        {
+          "x": 108.0,
+          "y": 276.26,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Danilo Jimenez Rezende, SM Ali Eslami, Shakir Mohamed, Peter Battaglia, Max Jaderberg, and Nicolas Heess. 从图像无监督学习 3D 结构。发表于 NIPS，2016 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 304.6,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Tim Salimans, Ian Goodfellow, Wojciech Zaremba, Vicki Cheung, Alec Radford, and Xi Chen. 改进的 GAN 训练技巧。发表于 NIPS，2016 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 332.94,
+          "width": 396.0,
+          "height": 20.93,
+          "fontSize": 9.96,
+          "text": "Yujun Shen, Ping Luo, Junjie Yan, Xiaogang Wang, and Xiaoou Tang. FaceID-GAN：学习一个对称的三方 GAN 用于保持身份的面部合成。发表于 CVPR，2018 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 361.29,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Vincent Sitzmann, Justus Thies, Felix Heide, Matthias Nießner, Gordon Wetzstein, and Michael Zollhofer. DeepVoxels：学习持久的 3D 特征嵌入。发表于 CVPR，2019 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 389.63,
+          "width": 396.0,
+          "height": 20.93,
+          "fontSize": 9.96,
+          "text": "Luan Tran, Xi Yin, and Xiaoming Liu. 用于姿态不变人脸识别的可解耦表示学习 GAN。发表于 CVPR，2017 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 417.98,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Nanyang Wang, Yinda Zhang, Zhuwen Li, Yanwei Fu, Wei Liu, and Yu-Gang Jiang. Pixel2Mesh：从单张 RGB 图像生成 3D 网格模型。发表于 ECCV，2018 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 446.32,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Jiajun Wu, Chengkai Zhang, Tianfan Xue, Bill Freeman, and Josh Tenenbaum. 通过 3D 生成对抗建模学习物体形状的概率潜在空间。发表于 NIPS，2016 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 474.67,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Xinchen Yan, Jimei Yang, Ersin Yumer, Yijie Guo, and Honglak Lee. Perspective Transformer Nets：在无 3D 监督下学习单视图 3D 物体重建。发表于 NIPS，2016 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 503.01,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "Fisher Yu, Ari Seff, Yinda Zhang, Shuran Song, Thomas Funkhouser, and Jianxiong Xiao. LSUN：在有人类参与的循环中使用深度学习构建大规模图像数据集。arXiv 预印本 arXiv:1506.03365，2015 年。"
+        },
+        {
+          "x": 108.0,
+          "y": 542.32,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "Tinghui Zhou, Matthew Brown, Noah Snavely, and David G. Lowe. 从视频无监督学习深度和自运动。发表于 CVPR，2017 年。"
+        },
+        {
+          "x": 108.3,
+          "y": 579.96,
+          "width": 166.54,
+          "height": 11.96,
+          "fontSize": 11.96,
+          "text": "A “WARP” 和 “PROJECTION”"
+        },
+        {
+          "x": 108.0,
+          "y": 604.44,
+          "width": 280.85,
+          "height": 9.96,
+          "fontSize": 9.96,
+          "text": "在此，我们解释方程 (5) 中的“warp”和“projection”操作。"
+        },
+        {
+          "x": 108.0,
+          "y": 627.32,
+          "width": 395.01,
+          "height": 21.84,
+          "fontSize": 9.96,
+          "text": "Warp 当我们将 G_RGB(z, c2) 扭曲到 G_RGB(z, c1) 时，首先计算在从视角 c2 观察时，G_RGB(z, c1) 中像素 p_{c1} 的位置。"
+        },
+        {
+          "x": 223.61,
+          "y": 667.37,
+          "width": 280.39,
+          "height": 19.13,
+          "fontSize": 9.96,
+          "text": "D_{c2} p_{c2} = K R_{1→2} K^{-1} D_{c1} p_{c1} + K t_{1→2} (8)"
+        },
+        {
+          "x": 108.0,
+          "y": 689.43,
+          "width": 396.0,
+          "height": 42.84,
+          "fontSize": 9.96,
+          "text": "这里，R_{1→2} 和 t_{1→2} 分别是相对旋转和平移矩阵。我们根据计算得到的位置 p_{c2} 对 G_RGB(z, c2) 进行扭曲。该操作通过对扭曲坐标的四个邻近像素颜色进行双线性采样实现，从而使该操作可微。对生成的深度图也执行相同的扭曲操作。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:04:30",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "12": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 12,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 187.43,
+          "width": 396.0,
+          "height": 64.76,
+          "fontSize": 9.96,
+          "text": "图 8：softmax 加权（左）与我们的遮挡推理算法（右）之间的比较。数值表示体素权重，橙色区域是在相机中可见的体素。对于 softmax 加权，遮挡网络需要根据相机位置改变体素权重。我们的方法沿相机光线累积权重，并忽略累积值超过 1 的体素，因此遮挡网络不需要根据相机位置改变权重。"
+        },
+        {
+          "x": 108.0,
+          "y": 272.27,
+          "width": 396.0,
+          "height": 50.09,
+          "fontSize": 9.96,
+          "text": "投影 由于 warp(G_D(z, c2), c1→2) 中的深度值是从 G_D(z, c2)（从 c2 视角看到）中采样得到的，若要将 G_D(z, c1) 与 warp(G_D(z, c2), c1→2) 进行比较，我们需要将 G_D(z, c1) 中每个像素的深度值投影到视点 c2。该操作与方程 8 中相同，并使用 D_{c2} 作为投影后的深度值。我们将其记作“projection”。"
+        },
+        {
+          "x": 108.3,
+          "y": 331.66,
+          "width": 101.63,
+          "height": 13.45,
+          "fontSize": 11.96,
+          "text": "B V_depth 和 V_color"
+        },
+        {
+          "x": 108.0,
+          "y": 356.43,
+          "width": 396.0,
+          "height": 97.71,
+          "fontSize": 9.96,
+          "text": "这些度量评估了跨视图的深度和颜色一致性。首先，图像由相同的 z 但不同的 c 生成。其次，为每张图像绘制点云到真实世界坐标系。第三，将坐标从原点转换为极坐标，并对角度坐标（方位角和仰角）进行量化。第四，对于每张图像，按照量化后的坐标对点进行聚合，我们将其称为“cell”。对于每个 cell，采样具有最小径向坐标的点。这样可以防止对具有多个表面的 cell 计算出不准确的方差。第五，计算每个 cell 上跨不同 c 的深度和颜色的方差。第六，对 cell 和不同 z 的方差求平均。随机采样 100 个 z，并对每个 z 随机采样 100 个 c 来计算这些度量。"
+        },
+        {
+          "x": 108.0,
+          "y": 459.52,
+          "width": 396.0,
+          "height": 44.35,
+          "fontSize": 9.96,
+          "text": "对于人脸图像，原点设置为 (0, 0, -0.5)（头部后方），并使用 -23° 到 23° 的角度范围。对于 ShapeNet 汽车数据集，原点设置为 (0, 0, 0)，方位角使用 -180° 到 180°，仰角使用 -90° 到 90°。白色区域在 ShapeNet 汽车图像的评估中被忽略。"
+        },
+        {
+          "x": 108.3,
+          "y": 520.61,
+          "width": 214.17,
+          "height": 11.95,
+          "fontSize": 11.96,
+          "text": "C 相机参数分布"
+        },
+        {
+          "x": 108.0,
+          "y": 545.1,
+          "width": 396.0,
+          "height": 42.92,
+          "fontSize": 9.96,
+          "text": "为了随机采样两个相似的相机参数 c1 和 c2，我们从均匀分布中采样 c1，并从靠近 c1 的区域内在角度范围内采样 c2。我们将 c1 与 c2 之间的最大距离限制为 30°，以避免较大的遮挡。由于从单张图像很难获得相机内参 K，我们在训练期间固定 K 和相机距离。我们将 K 设为："
+        },
+        {
+          "x": 269.39,
+          "y": 605.16,
+          "width": 57.76,
+          "height": 33.86,
+          "fontSize": 9.96,
+          "text": "K = ( 2s 0 s/2; 0 2s s/2; 0 0 1 )"
+        },
+        {
+          "x": 108.0,
+          "y": 649.2,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "其中 s 是图像的大小。我们将相机与坐标原点之间的距离固定为 1。"
+        },
+        {
+          "x": 108.3,
+          "y": 686.86,
+          "width": 255.84,
+          "height": 11.95,
+          "fontSize": 11.96,
+          "text": "D DeepVoxels 的实现细节"
+        },
+        {
+          "x": 108.0,
+          "y": 711.35,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "基于 DeepVoxels 的方法使用了 (Sitzmann et al., 2019) 中提出的投影层、遮挡模块和渲染模块实现。我们以更简单的"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:05:20",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "13": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 13,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 160.97,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "图9：遮挡推理算法的比较。所提出的方法相比 softmax 加权能够获得更一致的旋转并生成更一致的深度图。"
+        },
+        {
+          "x": 108.0,
+          "y": 205.1,
+          "width": 396.0,
+          "height": 42.84,
+          "fontSize": 9.96,
+          "text": "我们使用比原始实现中更简化的结构，以降低计算和内存开销。对遮挡模块我们使用了更少的 3D 卷积层，渲染模块则使用了带 AdaIN 的类 U-Net 网络。此外，为了简化起见，我们没有使用 (Nguyen-Phuoc et al., 2019) 中提出的 Identity regulariser 或 style discriminator。"
+        },
+        {
+          "x": 108.0,
+          "y": 254.92,
+          "width": 396.0,
+          "height": 130.51,
+          "fontSize": 9.96,
+          "text": "我们在遮挡推理中采用了不同的算法，以便在 ShapeNet car 和车图像数据集上获得一致的深度。DeepVoxels 中用于获取图像特征的遮挡推理是沿深度轴的 softmax 加权，如图8 左侧所示。该算法需要遮挡模块根据相机位姿计算体素的权重，但这在无监督学习下较难实现。因此，为了减少遮挡网络的训练开销，我们采用了显式的推理算法。网络估计每个体素位于物体表面的概率，即每个体素的不透明度。该不透明度使用 sigmoid 激活函数实现。随后，沿相机射线对权重进行累加，通过相加这些值来累积权重。当累积值超过 1 时，后续的体素将被忽略——将其权重替换为 0。通过这种方式，遮挡模块无需根据相机位姿改变体素权重。该算法概览见图8 右侧。"
+        },
+        {
+          "x": 108.0,
+          "y": 392.4,
+          "width": 396.0,
+          "height": 53.8,
+          "fontSize": 9.96,
+          "text": "使用“DeepVoxels + 3D loss”并分别采用每种算法在 ShapeNet car 数据集上的图像生成结果如图9 所示。所提出的遮挡推理模型能够获得更一致的 360° 旋转，而 softmax 加权则不能。此外，所提算法相比 softmax 加权能够生成更一致的深度图。结果表明该方法在无监督学习中的有效性。"
+        },
+        {
+          "x": 108.3,
+          "y": 463.62,
+          "width": 117.76,
+          "height": 11.95,
+          "fontSize": 11.96,
+          "text": "E 训练细节"
+        },
+        {
+          "x": 108.0,
+          "y": 488.79,
+          "width": 396.0,
+          "height": 75.72,
+          "fontSize": 9.96,
+          "text": "我们对基于 PGGAN 和 StyleGAN 的模型训练了 250,000 次迭代，批量大小为 32；对基于 3D 潜在特征的模型训练了 65,000 次迭代，批量大小为 10。所有模型均使用 Adam 优化器并采用等化学习率：生成器为 0.001，映射网络为 0.00001，判别器为 0.003。在实验中，我们使用了基于 ResNet 的判别器，以及带梯度惩罚的 non-saturating loss (Goodfellow et al., 2014) (Mescheder et al., 2018)。在单块 NVIDIA P100 GPU 上训练分别需要 DeepVoxels、StyleGAN 和 PGGAN 方法大约 30、40 和 50 小时。"
+        },
+        {
+          "x": 108.3,
+          "y": 581.92,
+          "width": 133.11,
+          "height": 11.96,
+          "fontSize": 11.96,
+          "text": "F 附加结果"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:05:55",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "14": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 14,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 631.32,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": "图10：在 FFHQ 数据集上的补充结果。每一行的图像由相同的潜在向量 z 生成，但方位角或俯仰角不同。带色彩图的图像为生成的深度图像。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:06:10",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "15": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 15,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": ""
+        },
+        {
+          "x": 108.0,
+          "y": 630.51,
+          "width": 396.0,
+          "height": 31.88,
+          "fontSize": 9.96,
+          "text": ""
+        }
+      ],
+      "translatedAt": "2026-03-11T19:06:27",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "16": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 16,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 的会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 703.59,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "图12：在 FFHQ 数据集上由 PGGAN 随机生成的 RGB 图像，比较使用与未使用所提出损失的结果。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:06:47",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "17": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 17,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "发表于 ICLR 2020 的会议论文"
+        },
+        {
+          "x": 108.0,
+          "y": 703.59,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "图13：在 ShapeNet 汽车数据集上由 PGGAN 随机生成的 RGB 图像，使用与不使用所提出的损失。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:07:06",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "18": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 18,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 的会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 703.59,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "图14：在 FFHQ 数据集上由 StyleGAN 随机生成的 RGB 图像，使用与不使用所提出的损失。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:07:21",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "19": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 19,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 703.59,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "图15：在 ShapeNet 汽车数据集上由 StyleGAN 随机生成的 RGB 图像（使用/未使用所提出的损失）。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:07:36",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "20": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 20,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 的会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 703.59,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "图16：DeepVoxels在FFHQ数据集上随机生成的RGB图像（使用与不使用所提出的损失）。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:08:03",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    },
+    "21": {
+      "paperId": "0f584526-24fd-4609-b347-a5c8ad1961dc",
+      "page": 21,
+      "width": 612.0,
+      "height": 792.0,
+      "blocks": [
+        {
+          "x": 108.0,
+          "y": 27.81,
+          "width": 185.1,
+          "height": 9.97,
+          "fontSize": 9.96,
+          "text": "作为 ICLR 2020 的会议论文发表"
+        },
+        {
+          "x": 108.0,
+          "y": 703.59,
+          "width": 396.0,
+          "height": 20.92,
+          "fontSize": 9.96,
+          "text": "图17：在 ShapeNet 汽车数据集上由 DeepVoxels 随机生成的 RGB 图像，分别展示了使用所提出损失与不使用该损失的结果。"
+        }
+      ],
+      "translatedAt": "2026-03-11T19:08:17",
+      "aiModel": "gpt-5-mini",
+      "aiProvider": "openai",
+      "translationMode": "vision"
+    }
+  },
+  "aiModel": "gpt-5-mini",
+  "aiProvider": "openai",
+  "translationMode": "vision",
+  "updatedAt": "2026-03-11T19:08:17"
+}

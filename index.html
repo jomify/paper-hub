@@ -1,0 +1,450 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paper Hub</title>
+  <link rel="stylesheet" href="./styles.css?v=20260311-8">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-mark">PH</div>
+        <div>
+          <p class="eyebrow">Academic Workbench</p>
+          <h1>Paper Hub</h1>
+        </div>
+      </div>
+
+      <section class="panel panel-soft">
+        <div class="panel-heading">
+          <p class="eyebrow">Overview</p>
+          <button class="text-button" id="seedButton" type="button">重置数据库</button>
+        </div>
+        <div class="stat-grid" id="statGrid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <p class="eyebrow">Quick Filter</p>
+        </div>
+        <div class="filter-group">
+          <label for="searchInput">搜索论文</label>
+          <input id="searchInput" class="input" type="search" placeholder="标题 / 作者 / 标签 / 摘要">
+        </div>
+        <div class="filter-group">
+          <label for="statusFilter">阅读状态</label>
+          <select id="statusFilter" class="input">
+            <option value="all">全部</option>
+            <option value="to-read">待读</option>
+            <option value="reading">在读</option>
+            <option value="reviewing">复读</option>
+            <option value="completed">已读</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="collectionFilter">合集</label>
+          <select id="collectionFilter" class="input">
+            <option value="all">全部合集</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="sortFilter">排序方式</label>
+          <select id="sortFilter" class="input">
+            <option value="recent">最近更新</option>
+            <option value="rating">评分优先</option>
+            <option value="year">年份优先</option>
+            <option value="priority">优先级</option>
+            <option value="favorite">收藏优先</option>
+          </select>
+        </div>
+        <label class="toggle-row" for="favoriteFilter">
+          <span>只看收藏</span>
+          <input id="favoriteFilter" type="checkbox">
+        </label>
+        <div class="filter-group">
+          <label>标签</label>
+          <div class="tag-cloud" id="tagCloud"></div>
+        </div>
+      </section>
+
+      <section class="panel panel-soft">
+        <div class="panel-heading">
+          <p class="eyebrow">Reading Stack</p>
+        </div>
+        <div class="mini-list" id="readingStack"></div>
+      </section>
+    </aside>
+
+    <main class="workspace">
+      <section class="app-notice hidden" id="appNotice"></section>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Paper Library</p>
+          <h2>把论文收藏、筛选、笔记、封面和合集管理放在一个界面里。</h2>
+          <p class="hero-copy">现在使用本地 SQLite 数据库，PDF 和数据库都保存在项目目录里，不再依赖浏览器本地缓存。</p>
+        </div>
+        <div class="hero-actions">
+          <button class="primary-button" id="newPaperButton" type="button">新增论文</button>
+          <button class="secondary-button" id="importButton" type="button">导入 PDF</button>
+          <button class="secondary-button" id="providerSettingsButton" type="button">AI Provider</button>
+          <button class="secondary-button" id="exportButton" type="button">导出 JSON</button>
+        </div>
+      </section>
+
+      <section class="library-toolbar">
+        <div>
+          <p class="eyebrow">Collection</p>
+          <h3>论文库</h3>
+        </div>
+        <div class="toolbar-actions">
+          <div class="view-toggle">
+            <button class="toggle-chip active" id="gridViewButton" type="button">封面墙</button>
+            <button class="toggle-chip" id="listViewButton" type="button">列表</button>
+          </div>
+          <p class="library-meta" id="resultMeta"></p>
+        </div>
+      </section>
+
+      <section class="paper-grid" id="paperGrid"></section>
+    </main>
+
+    <aside class="detail-pane">
+      <div class="detail-empty" id="detailEmpty">
+        <p class="eyebrow">Paper Detail</p>
+        <h3>选择一篇论文</h3>
+        <p>查看摘要、标签、阅读记录、合集与个人笔记。</p>
+      </div>
+      <article class="detail-card hidden" id="detailCard">
+        <div class="detail-cover" id="detailCover"></div>
+        <div class="detail-body">
+          <div class="detail-header">
+            <div>
+              <p class="eyebrow" id="detailStatus"></p>
+              <h3 id="detailTitle"></h3>
+            </div>
+            <div class="detail-top-actions">
+              <button class="icon-button" id="favoritePaperButton" type="button" title="收藏论文">☆</button>
+              <button class="icon-button" id="deletePaperButton" type="button" title="删除论文">×</button>
+            </div>
+          </div>
+
+          <div class="detail-meta" id="detailMeta"></div>
+
+          <section class="detail-section">
+            <h4>摘要</h4>
+            <p id="detailAbstract"></p>
+          </section>
+
+          <section class="detail-section">
+            <h4>标签</h4>
+            <div class="tag-cloud" id="detailTags"></div>
+          </section>
+
+          <section class="detail-section">
+            <h4>AI 摘要与分类</h4>
+            <div class="detail-meta" id="detailAiMeta"></div>
+            <p id="detailTitleZh"></p>
+            <p id="detailAiSummary"></p>
+          </section>
+
+          <section class="detail-section">
+            <div class="section-head">
+              <h4>论文精华</h4>
+              <button class="text-button" id="openDigestButton" type="button">查看</button>
+            </div>
+            <div class="detail-meta" id="detailDigestMeta"></div>
+            <p id="detailDigestPreview"></p>
+          </section>
+
+          <section class="detail-section">
+            <h4>阅读进度</h4>
+            <div class="detail-meta" id="detailReadingMeta"></div>
+          </section>
+
+          <section class="detail-section">
+            <div class="section-head">
+              <h4>笔记</h4>
+              <button class="text-button" id="saveNoteButton" type="button">保存</button>
+            </div>
+            <textarea id="detailNotes" class="note-box" placeholder="记录你的理解、疑问、复现线索"></textarea>
+          </section>
+
+          <section class="detail-section detail-actions">
+            <a id="detailLink" class="secondary-button" href="#" target="_blank" rel="noreferrer">打开链接</a>
+            <button class="secondary-button" id="runAiButton" type="button">AI 整理</button>
+            <button class="secondary-button" id="openReaderButton" type="button">在应用内阅读</button>
+            <button class="secondary-button" id="deletePaperActionButton" type="button">删除论文</button>
+            <button class="primary-button" id="editPaperButton" type="button">编辑信息</button>
+          </section>
+        </div>
+      </article>
+    </aside>
+  </div>
+
+  <dialog class="paper-dialog" id="paperDialog">
+    <form class="dialog-card" id="paperForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">Paper Editor</p>
+          <h3 id="dialogTitle">新增论文</h3>
+        </div>
+        <button class="icon-button" id="closeDialogButton" type="button">×</button>
+      </div>
+
+      <div class="form-grid">
+        <label>
+          标题
+          <input class="input" id="paperTitle" name="title" required>
+        </label>
+        <label>
+          作者
+          <input class="input" id="paperAuthors" name="authors" placeholder="逗号分隔">
+        </label>
+        <label>
+          年份
+          <input class="input" id="paperYear" name="year" type="number" min="1900" max="2100">
+        </label>
+        <label>
+          会议 / 期刊
+          <input class="input" id="paperVenue" name="venue">
+        </label>
+        <label>
+          DOI
+          <input class="input" id="paperDoi" name="doi">
+        </label>
+        <label>
+          链接
+          <input class="input" id="paperUrl" name="url" type="url" placeholder="https://">
+        </label>
+        <label>
+          阅读状态
+          <select class="input" id="paperStatus" name="status">
+            <option value="to-read">待读</option>
+            <option value="reading">在读</option>
+            <option value="reviewing">复读</option>
+            <option value="completed">已读</option>
+          </select>
+        </label>
+        <label>
+          优先级
+          <select class="input" id="paperPriority" name="priority">
+            <option value="low">低</option>
+            <option value="medium">中</option>
+            <option value="high">高</option>
+          </select>
+        </label>
+        <label>
+          评分
+          <input class="input" id="paperRating" name="rating" type="number" min="1" max="5">
+        </label>
+        <label>
+          标签
+          <input class="input" id="paperTags" name="tags" placeholder="如: NLP, Survey, Transformer">
+        </label>
+        <label>
+          合集
+          <input class="input" id="paperCollection" name="collection" placeholder="如: 大模型基础 / RAG">
+        </label>
+        <label class="checkbox-card" for="paperFavorite">
+          <span>加入收藏</span>
+          <input id="paperFavorite" name="favorite" type="checkbox">
+        </label>
+      </div>
+
+      <label class="full-width">
+        摘要
+        <textarea class="input textarea" id="paperAbstract" name="abstract"></textarea>
+      </label>
+
+      <label class="full-width">
+        笔记
+        <textarea class="input textarea" id="paperNotes" name="notes"></textarea>
+      </label>
+
+      <div class="cover-row">
+        <div class="cover-upload">
+          <label for="paperCover" class="upload-label">上传封面</label>
+          <input id="paperCover" name="cover" type="file" accept="image/*">
+          <p class="upload-hint">支持 JPG / PNG / WebP，优先用于卡片和详情页展示。</p>
+        </div>
+        <div class="cover-preview" id="coverPreview"></div>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="secondary-button" id="cancelDialogButton" type="button">取消</button>
+        <button class="primary-button" type="submit">保存论文</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="paper-dialog reader-dialog" id="readerDialog">
+    <div class="dialog-card reader-card">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">Reader</p>
+          <h3 id="readerTitle">论文阅读器</h3>
+        </div>
+        <div class="toolbar-actions">
+          <p class="library-meta" id="readerMeta"></p>
+          <button class="icon-button" id="closeReaderButton" type="button">×</button>
+        </div>
+      </div>
+
+      <div class="reader-toolbar">
+        <button class="secondary-button" id="readerPrevButton" type="button">上一页</button>
+        <button class="secondary-button" id="readerNextButton" type="button">下一页</button>
+        <div class="view-toggle reader-mode-toggle">
+          <button class="toggle-chip active" id="readerOriginalButton" type="button">原文</button>
+          <button class="toggle-chip" id="readerTranslatedButton" type="button">中文精读</button>
+          <button class="toggle-chip" id="readerEmbeddedButton" type="button">嵌入翻译</button>
+        </div>
+        <button class="secondary-button" id="readerDigestButton" type="button">论文精华</button>
+        <button class="secondary-button" id="readerPretranslateButton" type="button">一键全文翻译</button>
+        <a class="secondary-button" id="readerSourceLink" href="#" target="_blank" rel="noreferrer">打开原 PDF</a>
+        <button class="secondary-button" id="readerDeleteButton" type="button">删除论文</button>
+      </div>
+
+      <div class="reader-progress hidden" id="readerProgress"></div>
+      <div class="reader-scroll" id="readerScroll"></div>
+    </div>
+  </dialog>
+
+  <dialog class="paper-dialog digest-dialog" id="digestDialog">
+    <div class="dialog-card digest-card">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">Paper Digest</p>
+          <h3 id="digestTitle">论文精华</h3>
+        </div>
+        <div class="toolbar-actions">
+          <button class="secondary-button" id="refreshDigestButton" type="button">重新整理</button>
+          <button class="icon-button" id="closeDigestButton" type="button">×</button>
+        </div>
+      </div>
+      <p class="library-meta" id="digestMeta"></p>
+      <div class="digest-takeaways" id="digestTakeaways"></div>
+      <div class="digest-grid">
+        <section class="digest-section">
+          <h4>Abstract</h4>
+          <p class="digest-zh" id="digestAbstractZh"></p>
+          <details>
+            <summary>原文</summary>
+            <p id="digestAbstractOriginal"></p>
+          </details>
+        </section>
+        <section class="digest-section">
+          <h4>Method</h4>
+          <p class="digest-zh" id="digestMethodZh"></p>
+          <details>
+            <summary>原文</summary>
+            <p id="digestMethodOriginal"></p>
+          </details>
+        </section>
+        <section class="digest-section">
+          <h4>Conclusion</h4>
+          <p class="digest-zh" id="digestConclusionZh"></p>
+          <details>
+            <summary>原文</summary>
+            <p id="digestConclusionOriginal"></p>
+          </details>
+        </section>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="paper-dialog provider-dialog" id="providerDialog">
+    <form class="dialog-card provider-card" id="providerForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">AI Provider</p>
+          <h3>Provider 设置</h3>
+        </div>
+        <button class="icon-button" id="closeProviderButton" type="button">脳</button>
+      </div>
+
+      <div class="provider-grid">
+        <label class="full-width">
+          Provider
+          <select class="input" id="providerSelect" name="provider"></select>
+        </label>
+
+        <section class="provider-summary">
+          <p class="provider-title" id="providerLabel"></p>
+          <p class="provider-copy" id="providerDescription"></p>
+          <div class="detail-meta" id="providerCapabilities"></div>
+        </section>
+
+        <label>
+          Model
+          <input class="input" id="providerModel" name="model" placeholder="例如 gpt-5-mini / claude / gemini / qwen-vl">
+        </label>
+
+        <label>
+          API URL
+          <input class="input" id="providerApiUrl" name="apiUrl" placeholder="留空则用默认端点">
+        </label>
+
+        <label class="full-width">
+          API Key
+          <input class="input" id="providerApiKey" name="apiKey" type="password" autocomplete="off" placeholder="留空则保留当前已保存的 Key">
+          <span class="upload-hint" id="providerKeyHint"></span>
+        </label>
+
+        <label class="checkbox-card full-width" for="providerClearApiKey">
+          <span>清空当前 Provider 已保存的 Key</span>
+          <input id="providerClearApiKey" name="clearApiKey" type="checkbox">
+        </label>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="secondary-button" id="cancelProviderButton" type="button">取消</button>
+        <button class="primary-button" type="submit">保存 Provider</button>
+      </div>
+    </form>
+  </dialog>
+
+  <input id="importInput" type="file" accept="application/pdf" hidden>
+
+  <template id="paperCardTemplate">
+    <article class="paper-card">
+      <div class="paper-cover"></div>
+      <div class="paper-content">
+        <div class="paper-head">
+          <p class="status-pill"></p>
+          <p class="paper-year"></p>
+        </div>
+        <h4 class="paper-title"></h4>
+        <p class="paper-authors"></p>
+        <p class="paper-venue"></p>
+        <div class="paper-tags"></div>
+        <div class="paper-footer">
+          <span class="rating-pill"></span>
+          <span class="priority-pill"></span>
+          <span class="collection-pill"></span>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    window.addEventListener("error", (event) => {
+      const notice = document.querySelector("#appNotice");
+      if (!notice) return;
+      notice.classList.remove("hidden");
+      notice.innerHTML = `<strong>页面加载失败</strong><span>${String(event.message || "前端脚本没有成功加载。请刷新页面后重试。")}</span>`;
+    });
+
+    window.addEventListener("unhandledrejection", (event) => {
+      const notice = document.querySelector("#appNotice");
+      if (!notice) return;
+      notice.classList.remove("hidden");
+      notice.innerHTML = `<strong>运行出错</strong><span>${String(event.reason?.message || event.reason || "页面脚本执行失败。")}</span>`;
+    });
+  </script>
+  <script type="module" src="./app.js?v=20260311-9"></script>
+</body>
+</html>
+
