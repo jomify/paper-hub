@@ -533,7 +533,7 @@ function renderGrid(papers) {
     });
 
     if (paper.id === state.selectedPaperId) {
-      card.style.outline = "3px solid rgba(169, 92, 56, 0.48)";
+      card.style.outline = "3px solid rgba(228, 84, 125, 0.52)";
       card.style.outlineOffset = "1px";
     }
 

@@ -1,6 +1,10 @@
 .env
 __pycache__/
 *.pyc
+server.stdout.log
+server.stderr.log
+output/
+error_huma/
 
 paper_hub.db
 storage/pdfs/

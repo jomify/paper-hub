@@ -4,15 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paper Hub</title>
-  <link rel="stylesheet" href="./styles.css?v=20260311-8">
+  <link rel="stylesheet" href="./styles.css?v=20260312-1">
 </head>
 <body>
   <div class="app-shell">
+    <div class="scene-backdrop" aria-hidden="true">
+      <span class="petal petal-one"></span>
+      <span class="petal petal-two"></span>
+      <span class="petal petal-three"></span>
+      <span class="petal petal-four"></span>
+    </div>
+
     <aside class="sidebar">
       <div class="brand-block">
-        <div class="brand-mark">PH</div>
+        <div class="brand-mark" aria-hidden="true">
+          <img class="brand-avatar" src="./data/photo/101.jpg" alt="">
+        </div>
         <div>
-          <p class="eyebrow">Academic Workbench</p>
+          <p class="eyebrow">Local Paper Workbench</p>
+          <p class="brand-kana">ペーパーハブ</p>
           <h1>Paper Hub</h1>
         </div>
       </div>
@@ -81,18 +91,55 @@
       <section class="app-notice hidden" id="appNotice"></section>
 
       <section class="hero">
-        <div>
-          <p class="eyebrow">Paper Library</p>
-          <h2>把论文收藏、筛选、笔记、封面和合集管理放在一个界面里。</h2>
-          <p class="hero-copy">现在使用本地 SQLite 数据库，PDF 和数据库都保存在项目目录里，不再依赖浏览器本地缓存。</p>
+        <div class="hero-copy-block">
+          <div>
+            <p class="eyebrow">Paper Hub</p>
+            <p class="hero-kana">本地论文工作台</p>
+            <h2>集中管理论文、阅读进度和研究笔记。</h2>
+            <p class="hero-copy">本地保存 PDF、封面、笔记、论文精华与知识地图，让论文库本身成为你的工作入口。</p>
+          </div>
+          <div class="hero-badges" aria-label="Feature highlights">
+            <span class="hero-badge">本地数据库</span>
+            <span class="hero-badge">应用内阅读</span>
+            <span class="hero-badge">知识地图</span>
+          </div>
+          <div class="hero-actions">
+            <button class="primary-button" id="newPaperButton" type="button">新增论文</button>
+            <button class="secondary-button" id="importButton" type="button">导入 PDF</button>
+            <button class="secondary-button" id="topicDiscoveryButton" type="button">主题发现</button>
+            <button class="secondary-button" id="mapButton" type="button">知识地图</button>
+            <button class="secondary-button" id="providerSettingsButton" type="button">AI Provider</button>
+            <button class="secondary-button" id="exportButton" type="button">导出 JSON</button>
+          </div>
         </div>
-        <div class="hero-actions">
-          <button class="primary-button" id="newPaperButton" type="button">新增论文</button>
-          <button class="secondary-button" id="importButton" type="button">导入 PDF</button>
-          <button class="secondary-button" id="topicDiscoveryButton" type="button">主题发现</button>
-          <button class="secondary-button" id="mapButton" type="button">知识地图</button>
-          <button class="secondary-button" id="providerSettingsButton" type="button">AI Provider</button>
-          <button class="secondary-button" id="exportButton" type="button">导出 JSON</button>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-orbit hero-orbit-a"></div>
+          <div class="hero-orbit hero-orbit-b"></div>
+          <div class="hero-showcase hero-paper-stage">
+            <div class="hero-paper-stack">
+              <article class="hero-paper hero-paper-back"></article>
+              <article class="hero-paper hero-paper-mid"></article>
+              <article class="hero-paper hero-paper-front">
+                <p class="hero-paper-kicker">当前工作区</p>
+                <strong>本地论文库</strong>
+                <span class="hero-paper-meta">导入 PDF / AI 摘要 / 中文精读 / 知识地图</span>
+                <div class="hero-paper-lines">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <div class="hero-paper-tags">
+                  <span>应用内阅读</span>
+                  <span>论文精华</span>
+                  <span>知识地图</span>
+                </div>
+              </article>
+            </div>
+          </div>
+          <div class="hero-note hero-note-top">
+            <span>AI 摘要</span>
+            <strong>已就绪</strong>
+          </div>
         </div>
       </section>
 
@@ -117,6 +164,9 @@
       <div class="detail-empty" id="detailEmpty">
         <p class="eyebrow">Paper Detail</p>
         <h3>选择一篇论文</h3>
+        <div class="detail-empty-illustration" aria-hidden="true">
+          <img class="detail-empty-photo" src="./data/photo/101.jpg" alt="">
+        </div>
         <p>查看摘要、标签、阅读记录、合集与个人笔记。</p>
       </div>
       <article class="detail-card hidden" id="detailCard">
@@ -364,7 +414,7 @@
           <p class="eyebrow">AI Provider</p>
           <h3>Provider 设置</h3>
         </div>
-        <button class="icon-button" id="closeProviderButton" type="button">脳</button>
+        <button class="icon-button" id="closeProviderButton" type="button">×</button>
       </div>
 
       <div class="provider-grid">
@@ -556,7 +606,7 @@
       notice.innerHTML = `<strong>运行出错</strong><span>${String(event.reason?.message || event.reason || "页面脚本执行失败。")}</span>`;
     });
   </script>
-  <script type="module" src="./app.js?v=20260311-9"></script>
+  <script type="module" src="./app.js?v=20260312-1"></script>
 </body>
 </html>
 

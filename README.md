@@ -1,104 +1,124 @@
 # Paper Hub
 
-> Your local AI paper workbench.
+> A local-first paper workspace for importing, reading, summarizing, and mapping your research library.
 
-Paper Hub 是一个本地运行的论文阅读与整理工具。  
-它把 PDF 导入、AI 元数据整理、应用内阅读、中文翻译、论文 Digest、知识地图、主题发现下载放进同一个界面里，适合个人研究者、学生和独立开发者在自己的电脑上建立论文库。
+[![Python](https://img.shields.io/badge/Python-3.10%2B-24305e?style=flat-square)](https://www.python.org/)
+[![SQLite](https://img.shields.io/badge/Storage-SQLite-f7c178?style=flat-square)](https://www.sqlite.org/)
+[![UI](https://img.shields.io/badge/UI-HTML%20%2B%20CSS%20%2B%20JS-e4547d?style=flat-square)](#)
+[![Mode](https://img.shields.io/badge/Mode-Local%20First-7cc7ff?style=flat-square)](#)
 
-## Why Paper Hub
+Paper Hub is built for one job: make your paper library usable every day.
 
-如果你平时会遇到这些问题：
+Instead of scattering PDFs across download folders, browser bookmarks, note apps, and one-off AI chats, Paper Hub keeps the whole workflow in one local workspace:
 
-- 论文散落在下载目录、浏览器收藏夹、网盘和笔记软件里
-- PDF 下载了很多，但很难形成稳定的阅读顺序
-- 想快速得到中文摘要、重点结论和方法脉络
-- 想围绕某个主题批量找论文，而不是一篇篇手动搜
+- import PDF papers
+- organize metadata and notes
+- read inside the app
+- generate AI summaries and digests
+- explore a library-wide knowledge map
+- discover related papers by topic
 
-这个项目就是为这些场景准备的。
+## Why It Exists
 
-## What It Can Do
+Most tools only solve one slice of the paper workflow.
 
-- 导入本地 PDF，自动提取标题、摘要、标签和封面
-- 用 AI 整理论文元数据：中文标题、中文摘要、标签、分类、合集
-- 在应用内直接阅读 PDF，并保存阅读进度
-- 支持中文精读、嵌入翻译、全文翻译任务
-- 生成论文 Digest：`Abstract / Method / Conclusion`
-- 生成全库知识地图：思维导图 + 知识图谱
-- 输入研究主题，自动检索开放 PDF，AI 评估 CRAAP，并推荐阅读顺序
-- 数据全部保存在本地，默认使用 SQLite + 本地文件存储
+- Reference managers store metadata but feel detached from reading
+- Note apps store thoughts but not the paper itself
+- AI chats summarize content but do not build a persistent library
+- Download folders become a graveyard of unnamed PDFs
 
-## Architecture
+Paper Hub treats the library itself as the product.
 
-### Overall Architecture
+## What It Does
+
+| Module | What you get |
+| --- | --- |
+| Paper Library | Grid/list browsing, favorites, filters, tags, collections, ratings, priorities |
+| PDF Import | Local PDF upload, metadata extraction, cover generation, project-local storage |
+| In-App Reader | Read papers inside the app with progress tracking and page state |
+| AI Enrichment | Chinese title, AI summary, keywords, category, collection suggestions |
+| Digest | Abstract / Method / Conclusion highlights with readable takeaways |
+| Topic Discovery | Search by research topic and pull in open papers automatically |
+| Knowledge Map | Mind-map and graph views across the full library or the selected paper |
+| Export | Export current library data to JSON |
+
+## Product Shape
 
 ```mermaid
 flowchart LR
-    U[User] --> B[Browser UI]
+    U[User] --> UI[Browser UI]
 
     subgraph Frontend
-        B --> H[index.html]
-        B --> J[app.js]
-        B --> C[styles.css]
+        UI --> H[index.html]
+        UI --> J[app.js]
+        UI --> C[styles.css]
     end
 
-    J --> API[Python Local Server<br/>server.py]
+    J --> API[server.py]
 
-    subgraph Local Runtime
-        API --> DB[(SQLite<br/>paper_hub.db)]
+    subgraph Local Storage
+        API --> DB[(paper_hub.db)]
         API --> PDFS[storage/pdfs]
         API --> COVERS[storage/covers]
         API --> RENDERS[storage/renders]
         API --> TRANS[storage/translations]
-        API --> DIGEST[storage/digests]
+        API --> DIGESTS[storage/digests]
         API --> MAPS[storage/maps]
     end
 
-    API --> PDF[PDF Parsing<br/>PyMuPDF / pypdf]
-    API --> AI[AI Providers<br/>OpenAI / Anthropic / Gemini / Ollama / LM Studio ...]
-    API --> ARXIV[Open PDF Search<br/>arXiv]
+    API --> PARSE[PyMuPDF / pypdf]
+    API --> PROVIDERS[AI Providers]
+    API --> SEARCH[Open paper discovery]
 ```
 
-### Topic Discovery Flow
+## Experience Highlights
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant UI as Paper Hub UI
-    participant Server as server.py
-    participant Search as arXiv
-    participant AI as AI Provider
-    participant Storage as Local Storage
+### 1. Local-first by default
 
-    User->>UI: 输入研究主题
-    UI->>Server: POST /api/topic-discovery
-    Server->>Search: 检索开放 PDF 候选论文
-    Search-->>Server: 返回论文元数据
-    Server->>AI: 评估主题相关性 + CRAAP + 推荐阅读阶段
-    AI-->>Server: 返回评分与阅读理由
-    Server->>Storage: 下载前 N 篇 PDF 并入库
-    Server-->>UI: 返回候选论文 + 评分 + 导入状态 + 阅读顺序
-    UI-->>User: 展示推荐结果
-```
+- SQLite for library metadata
+- project-local storage for PDFs, covers, digests, translations, and map caches
+- no SaaS dashboard required
+
+### 2. Reading is not an afterthought
+
+- open a paper directly in the app
+- keep reading progress and page state
+- move between original text, translated reading, and embedded translation views
+
+### 3. AI is attached to your library
+
+- enrich metadata in-place
+- keep summaries and digests linked to the paper
+- build reusable structure over time instead of one-off outputs
+
+### 4. Discovery feeds the library
+
+- enter a topic
+- search open papers
+- score relevance
+- import recommended items into the same workspace
 
 ## Quick Start
 
-### 1. Install Dependencies
+### Requirements
 
-需要 Python 3.10+。
+- Python 3.10+
+
+### Install dependencies
 
 ```powershell
 pip install pymupdf pypdf
 ```
 
-### 2. Configure AI
+### Configure AI
 
-复制环境变量模板：
+Optional, but recommended if you want summaries, digests, translation workflows, and better topic discovery.
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-然后填写你自己的配置，例如：
+Example:
 
 ```env
 AI_PROVIDER=openai
@@ -107,123 +127,39 @@ AI_MODEL=gpt-5-mini
 AI_API_URL=
 ```
 
-也可以不写 `.env`，启动后在页面右上角的 `AI Provider` 面板里配置。
+You can also configure providers from the in-app `AI Provider` panel.
 
-### 3. Run
+### Run
 
 ```powershell
 python server.py
 ```
 
-或者在 Windows 上直接双击：
+Or on Windows:
 
 ```text
 start.bat
 ```
 
-打开浏览器访问：
+Then open:
 
 ```text
 http://127.0.0.1:8876
 ```
 
-## User Guide
+## Typical Workflow
 
-### Import a PDF
+1. Import a PDF into the local library
+2. Let Paper Hub extract metadata and create a cover
+3. Run AI enrichment for title, summary, and keywords
+4. Read inside the app and save notes
+5. Open the digest for fast recall
+6. Use the knowledge map to see topic structure
+7. Run topic discovery when you want to expand the library
 
-1. 点击 `导入 PDF`
-2. 选择你的本地论文文件
-3. 等待系统自动提取标题、摘要、标签和封面
+## AI Provider Support
 
-### Organize With AI
-
-1. 在论文库中选中一篇论文
-2. 点击 `AI 整理`
-3. 系统会补全：
-   - 中文标题
-   - 中文摘要
-   - 标签
-   - 分类
-   - 合集
-   - 阅读优先级
-
-### Read Inside the App
-
-选中带本地 PDF 的论文后，点击 `在应用内阅读`。
-
-你可以切换三种模式：
-
-- `原文`
-- `中文精读`
-- `嵌入翻译`
-
-系统会自动记录阅读进度和上次阅读位置。
-
-### Generate a Paper Digest
-
-点击 `论文精华`，系统会生成：
-
-- Abstract 精读
-- Method 精读
-- Conclusion 精读
-- 中文要点列表
-
-### Explore the Knowledge Map
-
-点击 `知识地图`，你可以从两个角度查看论文库：
-
-- 全库视角
-- 当前论文视角
-
-并且可以在两种图之间切换：
-
-- 思维导图
-- 知识图谱
-
-### Discover Papers by Topic
-
-点击 `主题发现`，输入研究主题，例如：
-
-- `RAG evaluation`
-- `multimodal retrieval`
-- `multi-agent planning`
-- `多模态检索增强生成`
-
-系统会自动：
-
-1. 检索开放可下载的 PDF
-2. 用 AI 评估与主题的语义相关性
-3. 按 CRAAP 给出优先级
-4. 推荐阅读顺序
-5. 自动下载前 N 篇并导入本地论文库
-
-说明：
-
-- 这里的“相关性”是按主题语义判断，不要求论文标题逐字匹配输入主题
-- 如果 AI 不可用，会自动回退到本地启发式评分
-- 当前主题发现默认使用 arXiv 作为开放 PDF 来源
-
-## Data Storage
-
-Paper Hub 默认把数据保存在项目目录里：
-
-- `paper_hub.db`：论文元数据数据库
-- `storage/pdfs/`：本地 PDF
-- `storage/covers/`：封面
-- `storage/renders/`：阅读器页面渲染图
-- `storage/translations/`：翻译缓存
-- `storage/digests/`：Digest 缓存
-- `storage/maps/`：知识地图缓存
-
-这意味着：
-
-- 数据不会默认上传到云端
-- 迁移项目目录即可迁移大部分数据
-- 公开仓库时不要提交这些运行时文件
-
-## Supported AI Providers
-
-项目内置多种 Provider 适配，包括：
+Paper Hub supports multiple provider styles, including:
 
 - OpenAI
 - Anthropic
@@ -236,14 +172,47 @@ Paper Hub 默认把数据保存在项目目录里：
 - Azure OpenAI
 - Ollama
 - LM Studio
-- OpenAI-compatible relay
+- OpenAI-compatible relays
+
+## Project Layout
+
+```text
+paper-hub/
+- index.html
+- app.js
+- styles.css
+- server.py
+- paper_hub.db
+- provider_config.json
+- storage/
+  - pdfs/
+  - covers/
+  - renders/
+  - translations/
+  - digests/
+  - maps/
+- docs/
+```
+
+## Data Storage
+
+By default, Paper Hub keeps data in the project directory:
+
+- `paper_hub.db`: library metadata
+- `storage/pdfs/`: imported papers
+- `storage/covers/`: generated covers
+- `storage/renders/`: rendered reader pages
+- `storage/translations/`: cached translation results
+- `storage/digests/`: paper digest cache
+- `storage/maps/`: knowledge map cache
+
+This makes backup, migration, and local ownership straightforward.
 
 ## Troubleshooting
 
-### The page does not work when I double-click `index.html`
+### The page does not work when double-clicking `index.html`
 
-不要直接打开 HTML 文件。  
-先运行本地服务：
+Do not open the HTML file directly. Start the local server first:
 
 ```powershell
 python server.py
@@ -251,35 +220,28 @@ python server.py
 
 ### AI features are unavailable
 
-通常是下面几个原因：
-
-- 没有配置 API key
-- Provider 端点不正确
-- 模型名不正确
-- 当前网络无法访问模型服务
-
-优先检查：
+Check:
 
 - `.env`
-- 页面中的 `AI Provider` 设置面板
+- the in-app `AI Provider` panel
+- whether the selected model and API URL are valid
+- whether your current network can reach the provider
 
 ### Topic discovery is weak for Chinese queries
 
-如果没有启用 AI，系统无法先把中文主题改写成更适合学术检索的英文查询，召回效果会下降。  
-更稳定的做法：
+If AI is not configured, the app cannot rewrite Chinese topics into stronger academic search queries. For better results:
 
-- 配置 AI Provider
-- 或者直接使用英文研究主题
+- configure an AI provider
+- or search with English research terms directly
 
+## Roadmap
 
-## Roadmap Ideas
-
-- OpenAlex / Semantic Scholar / Crossref 多源检索
-- 手动勾选主题发现结果后再导入
-- BibTeX / RIS 导入导出
-- 更细粒度的全文搜索
-- 多设备同步或备份
+- multi-source academic search beyond the current open paper flow
+- BibTeX / RIS import and export
+- more granular full-text search
+- better backup and sync workflows
+- richer cross-paper clustering and recommendation logic
 
 ## License
 
-如果准备正式公开发布，建议补充 `LICENSE` 文件。
+If you plan to distribute the project publicly, add a `LICENSE` file before release.
